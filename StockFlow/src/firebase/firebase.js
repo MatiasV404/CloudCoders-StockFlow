@@ -1,5 +1,6 @@
-import { initializeApp } from 'firebase/app'
-import { getAnalytics, isSupported } from 'firebase/analytics'
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -8,17 +9,12 @@ const firebaseConfig = {
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
-}
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
+};
 
-export const app = initializeApp(firebaseConfig)
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const auth = getAuth(app);
+const googleProvider = new GoogleAuthProvider();
 
-// Inicializa Analytics solo si es compatible (evita errores en dev/SSR)
-export let analytics
-if (typeof window !== 'undefined') {
-  isSupported()
-    .then((ok) => {
-      if (ok) analytics = getAnalytics(app)
-    })
-    .catch(() => {})
-}
+export { app, analytics, auth, googleProvider };
