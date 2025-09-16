@@ -1,3 +1,42 @@
+
+<script setup>
+import { ref } from 'vue'
+import { useAuth } from '../../composables/useAuth.js'
+
+const { loginWithEmail, registerWithEmail, loginWithGoogle, loading, error } = useAuth()
+
+const email = ref('')
+const password = ref('')
+const rememberMe = ref(false)
+const isRegisterMode = ref(false)
+
+const handleLogin = async () => {
+  try {
+    if (isRegisterMode.value) {
+      await registerWithEmail(email.value, password.value)
+    } else {
+      await loginWithEmail(email.value, password.value)
+    }
+  } catch (err) {
+    console.error('Error en autenticación:', err)
+  }
+}
+
+const handleGoogleLogin = async () => {
+  try {
+    await loginWithGoogle()
+  } catch (err) {
+    console.error('Error con Google:', err)
+  }
+}
+
+const toggleRegister = () => {
+  isRegisterMode.value = !isRegisterMode.value
+  error.value = null
+}
+</script>
+
+
 <template>
   <div class="login-container">
     <div class="login-card">
@@ -71,48 +110,11 @@
 
       <!-- Footer -->
       <div class="footer">
-        <p>Contacto de Soporte +56 9 7777 5555 / 9 5454 5488 - Correo: WorkFlowSuport@Correo.com</p>
+        <p>Contacto de Soporte +56 9 7777 5555 / 9 5454 5488 - Correo: WorkFlowSupport@Correo.com</p>
       </div>
     </div>
   </div>
 </template>
-
-<script setup>
-import { ref } from 'vue'
-import { useAuth } from '../../composables/useAuth.js'
-
-const { loginWithEmail, registerWithEmail, loginWithGoogle, loading, error } = useAuth()
-
-const email = ref('')
-const password = ref('')
-const rememberMe = ref(false)
-const isRegisterMode = ref(false)
-
-const handleLogin = async () => {
-  try {
-    if (isRegisterMode.value) {
-      await registerWithEmail(email.value, password.value)
-    } else {
-      await loginWithEmail(email.value, password.value)
-    }
-  } catch (err) {
-    console.error('Error en autenticación:', err)
-  }
-}
-
-const handleGoogleLogin = async () => {
-  try {
-    await loginWithGoogle()
-  } catch (err) {
-    console.error('Error con Google:', err)
-  }
-}
-
-const toggleRegister = () => {
-  isRegisterMode.value = !isRegisterMode.value
-  error.value = null
-}
-</script>
 
 <style scoped>
 .login-container {
