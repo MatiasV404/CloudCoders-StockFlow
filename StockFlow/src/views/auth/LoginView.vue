@@ -1,59 +1,153 @@
 <template>
   <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-600 p-5">
     <div class="bg-white rounded-2xl shadow-2xl p-10 w-full max-w-md min-h-[500px] flex flex-col">
-      <!-- Logo y título -->
+      <!-- Logo y título con indicador de modo -->
       <div class="text-center mb-8">
-        <div class="flex items-center justify-center gap-2">
+        <div class="flex items-center justify-center gap-2 mb-3">
           <h1 class="text-4xl font-semibold text-blue-500 m-0">StockFlow</h1>
           <div class="text-3xl">📦</div>
         </div>
+        
+        <!-- Indicador visual del modo actual -->
+        <div class="flex items-center justify-center gap-3 mb-4">
+          <div class="flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 cursor-pointer" 
+               :class="!isRegisterMode ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'"
+               @click="isRegisterMode = false">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" />
+            </svg>
+            <span class="text-sm font-medium">Iniciar Sesión</span>
+          </div>
+          
+          <div class="w-px h-6 bg-gray-300"></div>
+          
+          <div class="flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 cursor-pointer"
+               :class="isRegisterMode ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'"
+               @click="isRegisterMode = true">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M15,14C12.33,14 7,15.33 7,18V20H23V18C23,15.33 17.67,14 15,14M6,10V7H4V10H1V12H4V15H6V12H9V10M15,12A4,4 0 0,0 19,8A4,4 0 0,0 15,4A4,4 0 0,0 11,8A4,4 0 0,0 15,12Z" />
+            </svg>
+            <span class="text-sm font-medium">Registro</span>
+          </div>
+        </div>
+        
+        <!-- Título dinámico -->
+        <h2 class="text-xl font-semibold text-gray-800 m-0 transition-all duration-300">
+          {{ isRegisterMode ? '¡Únete a StockFlow!' : '¡Bienvenido de vuelta!' }}
+        </h2>
+        <p class="text-sm text-gray-600 mt-1 transition-all duration-300">
+          {{ isRegisterMode ? 'Crea tu cuenta para comenzar' : 'Inicia sesión en tu cuenta' }}
+        </p>
       </div>
 
       <!-- Formulario -->
       <form @submit.prevent="handleLogin" class="flex-1 flex flex-col gap-5">
+        <!-- Campo de email con icono -->
         <div class="flex flex-col gap-2">
-          <label for="email" class="font-medium text-gray-700 text-sm">Usuario:</label>
-          <input
-            id="email"
-            v-model="email"
-            type="email"
-            placeholder="Ingresa tu email"
-            required
-            :disabled="loading"
-            class="px-4 py-3 border-2 border-gray-200 rounded-lg text-base transition-colors focus:outline-none focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-          />
+          <label for="email" class="font-medium text-gray-700 text-sm flex items-center gap-2">
+            <svg class="w-4 h-4 text-gray-500" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M20,8L12,13L4,8V6L12,11L20,6M20,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6C22,4.89 21.1,4 20,4Z" />
+            </svg>
+            {{ isRegisterMode ? 'Email:' : 'Usuario:' }}
+          </label>
+          <div class="relative">
+            <input
+              id="email"
+              v-model="email"
+              type="email"
+              :placeholder="isRegisterMode ? 'Ingresa tu email' : 'Ingresa tu email'"
+              required
+              :disabled="loading"
+              class="w-full px-4 py-3 pl-10 border-2 border-gray-200 rounded-lg text-base transition-colors focus:outline-none focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+            />
+            <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M20,8L12,13L4,8V6L12,11L20,6M20,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6C22,4.89 21.1,4 20,4Z" />
+            </svg>
+          </div>
         </div>
 
+        <!-- Campo de contraseña con icono -->
         <div class="flex flex-col gap-2">
-          <label for="password" class="font-medium text-gray-700 text-sm">Contraseña:</label>
-          <input
-            id="password"
-            v-model="password"
-            type="password"
-            placeholder="Ingresa tu contraseña"
-            required
-            :disabled="loading"
-            class="px-4 py-3 border-2 border-gray-200 rounded-lg text-base transition-colors focus:outline-none focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-          />
+          <label for="password" class="font-medium text-gray-700 text-sm flex items-center gap-2">
+            <svg class="w-4 h-4 text-gray-500" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12,17A2,2 0 0,0 14,15C14,13.89 13.1,13 12,13A2,2 0 0,0 10,15A2,2 0 0,0 12,17M18,8A2,2 0 0,1 20,10V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V10C4,8.89 4.9,8 6,8H7V6A5,5 0 0,1 12,1A5,5 0 0,1 17,6V8H18M12,3A3,3 0 0,0 9,6V8H15V6A3,3 0 0,0 12,3Z" />
+            </svg>
+            Contraseña:
+          </label>
+          <div class="relative">
+            <input
+              id="password"
+              v-model="password"
+              type="password"
+              :placeholder="isRegisterMode ? 'Crea una contraseña segura' : 'Ingresa tu contraseña'"
+              required
+              :disabled="loading"
+              class="w-full px-4 py-3 pl-10 border-2 border-gray-200 rounded-lg text-base transition-colors focus:outline-none focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+            />
+            <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12,17A2,2 0 0,0 14,15C14,13.89 13.1,13 12,13A2,2 0 0,0 10,15A2,2 0 0,0 12,17M18,8A2,2 0 0,1 20,10V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V10C4,8.89 4.9,8 6,8H7V6A5,5 0 0,1 12,1A5,5 0 0,1 17,6V8H18M12,3A3,3 0 0,0 9,6V8H15V6A3,3 0 0,0 12,3Z" />
+            </svg>
+          </div>
         </div>
 
-        <div class="flex items-center gap-2">
+        <!-- Confirmar contraseña solo para registro -->
+        <div v-if="isRegisterMode" class="flex flex-col gap-2">
+          <label for="confirmPassword" class="font-medium text-gray-700 text-sm flex items-center gap-2">
+            <svg class="w-4 h-4 text-gray-500" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12,17A2,2 0 0,0 14,15C14,13.89 13.1,13 12,13A2,2 0 0,0 10,15A2,2 0 0,0 12,17M18,8A2,2 0 0,1 20,10V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V10C4,8.89 4.9,8 6,8H7V6A5,5 0 0,1 12,1A5,5 0 0,1 17,6V8H18M12,3A3,3 0 0,0 9,6V8H15V6A3,3 0 0,0 12,3Z" />
+            </svg>
+            Confirmar Contraseña:
+          </label>
+          <div class="relative">
+            <input
+              id="confirmPassword"
+              v-model="confirmPassword"
+              type="password"
+              placeholder="Confirma tu contraseña"
+              required
+              :disabled="loading"
+              class="w-full px-4 py-3 pl-10 border-2 border-gray-200 rounded-lg text-base transition-colors focus:outline-none focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+            />
+            <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12,17A2,2 0 0,0 14,15C14,13.89 13.1,13 12,13A2,2 0 0,0 10,15A2,2 0 0,0 12,17M18,8A2,2 0 0,1 20,10V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V10C4,8.89 4.9,8 6,8H7V6A5,5 0 0,1 12,1A5,5 0 0,1 17,6V8H18M12,3A3,3 0 0,0 9,6V8H15V6A3,3 0 0,0 12,3Z" />
+            </svg>
+          </div>
+        </div>
+
+        <!-- Checkbox "Guardar Sesión" solo para login -->
+        <div v-if="!isRegisterMode" class="flex items-center gap-2">
           <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-600">
-            <input v-model="rememberMe" type="checkbox" class="m-0 w-auto" />
-            Guardar Sesión
+            <input v-model="rememberMe" type="checkbox" class="m-0 w-auto accent-blue-500" />
+            Guardar sesión
           </label>
         </div>
 
         <div class="flex flex-col gap-3 mt-2">
+          <!-- Botón principal con colores diferenciados -->
           <button 
             type="submit" 
-            :disabled="loading"
-            class="bg-blue-500 text-white border-0 px-5 py-3 rounded-lg text-base font-medium cursor-pointer transition-colors hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
+            :disabled="loading || (isRegisterMode && password !== confirmPassword)"
+            class="border-0 px-5 py-3 rounded-lg text-base font-medium cursor-pointer transition-all disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            :class="isRegisterMode 
+              ? 'bg-green-600 text-white hover:bg-green-700 disabled:bg-gray-300' 
+              : 'bg-blue-500 text-white hover:bg-blue-600 disabled:bg-gray-300'"
           >
-            <span v-if="loading">Iniciando...</span>
-            <span v-else>Iniciar sesión</span>
+            <svg v-if="isRegisterMode" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M15,14C12.33,14 7,15.33 7,18V20H23V18C23,15.33 17.67,14 15,14M6,10V7H4V10H1V12H4V15H6V12H9V10M15,12A4,4 0 0,0 19,8A4,4 0 0,0 15,4A4,4 0 0,0 11,8A4,4 0 0,0 15,12Z" />
+            </svg>
+            <svg v-else class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M10,17V14H3V10H10V7L15,12L10,17M10,2H19A2,2 0 0,1 21,4V20A2,2 0 0,1 19,22H10A2,2 0 0,1 8,20V18H10V20H19V4H10V6H8V4A2,2 0 0,1 10,2Z" />
+            </svg>
+            
+            <span v-if="loading">
+              {{ isRegisterMode ? 'Creando cuenta...' : 'Iniciando sesión...' }}
+            </span>
+            <span v-else>
+              {{ isRegisterMode ? 'Crear Cuenta' : 'Iniciar Sesión' }}
+            </span>
           </button>
 
+          <!-- Google button -->
           <button 
             type="button" 
             @click="handleGoogleLogin" 
@@ -66,27 +160,50 @@
               <path fill="#fbbc05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
               <path fill="#ea4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
             </svg>
-            Continuar con Google
+            {{ isRegisterMode ? 'Registrarse con Google' : 'Continuar con Google' }}
           </button>
 
+          <!-- Toggle button con mejor visual -->
           <button 
             type="button" 
             @click="toggleRegister" 
-            class="bg-transparent text-blue-500 border-2 border-blue-500 px-5 py-3 rounded-lg text-sm font-medium cursor-pointer transition-all hover:bg-blue-500 hover:text-white"
+            class="bg-transparent border-2 px-5 py-3 rounded-lg text-sm font-medium cursor-pointer transition-all flex items-center justify-center gap-2"
+            :class="isRegisterMode 
+              ? 'text-blue-500 border-blue-500 hover:bg-blue-500 hover:text-white' 
+              : 'text-green-600 border-green-600 hover:bg-green-600 hover:text-white'"
           >
-            {{ isRegisterMode ? 'Ya tengo cuenta' : 'Registro' }}
+            <svg v-if="isRegisterMode" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" />
+            </svg>
+            <svg v-else class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M15,14C12.33,14 7,15.33 7,18V20H23V18C23,15.33 17.67,14 15,14M6,10V7H4V10H1V12H4V15H6V12H9V10M15,12A4,4 0 0,0 19,8A4,4 0 0,0 15,4A4,4 0 0,0 11,8A4,4 0 0,0 15,12Z" />
+            </svg>
+            {{ isRegisterMode ? 'Ya tengo cuenta' : '¿No tienes cuenta? Regístrate' }}
           </button>
         </div>
 
-        <div v-if="error" class="bg-red-50 text-red-600 p-3 rounded-lg text-sm text-center border border-red-200">
+        <!-- Error message con mejor styling -->
+        <div v-if="error" class="bg-red-50 text-red-700 p-3 rounded-lg text-sm text-center border border-red-200 flex items-center gap-2 justify-center">
+          <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M13,14H11V10H13M13,18H11V16H13M1,21H23L12,2L1,21Z" />
+          </svg>
           {{ error }}
+        </div>
+
+        <!-- Validation message para confirmar contraseña -->
+        <div v-if="isRegisterMode && password && confirmPassword && password !== confirmPassword" 
+             class="bg-yellow-50 text-yellow-700 p-3 rounded-lg text-sm text-center border border-yellow-200 flex items-center gap-2 justify-center">
+          <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M13,14H11V10H13M13,18H11V16H13M1,21H23L12,2L1,21Z" />
+          </svg>
+          Las contraseñas no coinciden
         </div>
       </form>
 
       <!-- Footer -->
       <div class="mt-8 text-center">
         <p class="text-xs text-gray-500 m-0 leading-relaxed">
-          Contacto de Soporte +56 9 7777 5555 / 9 5454 5488 - Correo: WorkFlowSupport@Correo.com
+          Contacto de Soporte +56 9 7777 5555 / 9 5454 5488 - Correo: stockflowsupport@stockflow.com
         </p>
       </div>
     </div>
@@ -101,10 +218,17 @@ const { loginWithEmail, registerWithEmail, loginWithGoogle, loading, error } = u
 
 const email = ref('')
 const password = ref('')
+const confirmPassword = ref('')
 const rememberMe = ref(false)
 const isRegisterMode = ref(false)
 
 const handleLogin = async () => {
+  // Validación para registro
+  if (isRegisterMode.value && password.value !== confirmPassword.value) {
+    error.value = 'Las contraseñas no coinciden'
+    return
+  }
+
   try {
     if (isRegisterMode.value) {
       await registerWithEmail(email.value, password.value)
@@ -127,5 +251,6 @@ const handleGoogleLogin = async () => {
 const toggleRegister = () => {
   isRegisterMode.value = !isRegisterMode.value
   error.value = null
+  confirmPassword.value = ''
 }
 </script>
