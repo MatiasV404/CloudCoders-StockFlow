@@ -1,0 +1,36 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Reglas para usuarios autenticados
+    match /users/{userId} {
+      // Solo el usuario puede leer y escribir sus propios datos
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      
+      // Productos del usuario
+      match /products/{productId} {
+        // Solo el propietario puede acceder a sus productos
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+        
+        // Validaciones al escribir productos
+        allow create: if request.auth != null 
+          && request.auth.uid == userId
+          && validateProduct(request.resource.data);
+          
+        allow update: if request.auth != null 
+          && request.auth.uid == userId
+          && validateProduct(request.resource.data);
+      }
+    }
+    
+    // Función para validar datos de productos
+    function validateProduct(product) {
+      return product.keys().hasAll(['name', 'category', 'status', 'stock', 'price']) &&
+        product.name is string && product.name.size() > 0 &&
+        product.category is string && product.category.size() > 0 &&
+        product.status is string && product.status.size() > 0 &&
+        product.stock is number && product.stock >= 0 &&
+        product.price is number && product.price >= 0 &&
+        product.userId == request.auth.uid;
+    }
+  }
+}

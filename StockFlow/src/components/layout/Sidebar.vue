@@ -52,7 +52,7 @@
 
         <li class="mb-1">
           <router-link 
-            to="/" 
+            to="/inventory" 
             @click="handleLinkClick"
             class="group flex items-center gap-4 px-5 py-3 text-white/80 no-underline transition-all border-l-4 border-transparent hover:bg-white/10 hover:text-white relative"
             active-class="bg-white/15 text-white border-l-white"
