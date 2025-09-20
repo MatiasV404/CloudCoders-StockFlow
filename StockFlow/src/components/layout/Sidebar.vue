@@ -10,7 +10,7 @@
     <!-- Header del sidebar -->
     <div class="p-5 flex items-center justify-between border-b border-white/10">
       <div class="flex items-center gap-3">
-        <div class="text-3xl w-8 flex-shrink-0">📦</div>
+        <div class="text-3xl w-8 flex-shrink-0" v-if="!isCollapsed">📦</div>
         <span v-show="!isCollapsed" class="text-xl font-semibold whitespace-nowrap transition-opacity duration-300">StockFlow</span>
       </div>
       
