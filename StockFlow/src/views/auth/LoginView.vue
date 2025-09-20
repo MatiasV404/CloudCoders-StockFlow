@@ -66,7 +66,7 @@
           </div>
         </div>
 
-        <!-- Campo de contraseña con icono -->
+        <!-- Campo de contraseña con icono y toggle de visibilidad -->
         <div class="flex flex-col gap-2">
           <label for="password" class="font-medium text-gray-700 text-sm flex items-center gap-2">
             <svg class="w-4 h-4 text-gray-500" viewBox="0 0 24 24" fill="currentColor">
@@ -78,15 +78,32 @@
             <input
               id="password"
               v-model="password"
-              type="password"
+              :type="showPassword ? 'text' : 'password'"
               :placeholder="isRegisterMode ? 'Crea una contraseña segura' : 'Ingresa tu contraseña'"
               required
               :disabled="loading"
-              class="w-full px-4 py-3 pl-10 border-2 border-gray-200 rounded-lg text-base transition-colors focus:outline-none focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+              class="w-full px-4 py-3 pl-10 pr-12 border-2 border-gray-200 rounded-lg text-base transition-colors focus:outline-none focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
             />
+            <!-- Icono de candado -->
             <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12,17A2,2 0 0,0 14,15C14,13.89 13.1,13 12,13A2,2 0 0,0 10,15A2,2 0 0,0 12,17M18,8A2,2 0 0,1 20,10V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V10C4,8.89 4.9,8 6,8H7V6A5,5 0 0,1 12,1A5,5 0 0,1 17,6V8H18M12,3A3,3 0 0,0 9,6V8H15V6A3,3 0 0,0 12,3Z" />
             </svg>
+            <!-- Botón toggle mostrar/ocultar contraseña -->
+            <button
+              type="button"
+              @click="showPassword = !showPassword"
+              class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1 rounded"
+              :title="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+            >
+              <!-- Icono ojo abierto (mostrar) -->
+              <svg v-if="!showPassword" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z" />
+              </svg>
+              <!-- Icono ojo cerrado (ocultar) -->
+              <svg v-else class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M11.83,9L15,12.16C15,12.11 15,12.05 15,12A3,3 0 0,0 12,9C11.94,9 11.89,9 11.83,9M7.53,9.8L9.08,11.35C9.03,11.56 9,11.77 9,12A3,3 0 0,0 12,15C12.22,15 12.44,14.97 12.65,14.92L14.2,16.47C13.53,16.8 12.79,17 12,17A5,5 0 0,1 7,12C7,11.21 7.2,10.47 7.53,9.8M2,4.27L4.28,6.55L4.73,7C3.08,8.3 1.78,10 1,12C2.73,16.39 7,19.5 12,19.5C13.55,19.5 15.03,19.2 16.38,18.66L16.81,19.09L19.73,22L21,20.73L3.27,3M12,7A5,5 0 0,1 17,12C17,12.64 16.87,13.26 16.64,13.82L19.57,16.75C21.07,15.5 22.27,13.86 23,12C21.27,7.61 17,4.5 12,4.5C10.6,4.5 9.26,4.75 8,5.2L10.17,7.35C10.76,7.13 11.37,7 12,7Z" />
+              </svg>
+            </button>
           </div>
         </div>
 
@@ -102,15 +119,32 @@
             <input
               id="confirmPassword"
               v-model="confirmPassword"
-              type="password"
+              :type="showConfirmPassword ? 'text' : 'password'"
               placeholder="Confirma tu contraseña"
               required
               :disabled="loading"
-              class="w-full px-4 py-3 pl-10 border-2 border-gray-200 rounded-lg text-base transition-colors focus:outline-none focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+              class="w-full px-4 py-3 pl-10 pr-12 border-2 border-gray-200 rounded-lg text-base transition-colors focus:outline-none focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
             />
+            <!-- Icono de candado -->
             <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12,17A2,2 0 0,0 14,15C14,13.89 13.1,13 12,13A2,2 0 0,0 10,15A2,2 0 0,0 12,17M18,8A2,2 0 0,1 20,10V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V10C4,8.89 4.9,8 6,8H7V6A5,5 0 0,1 12,1A5,5 0 0,1 17,6V8H18M12,3A3,3 0 0,0 9,6V8H15V6A3,3 0 0,0 12,3Z" />
             </svg>
+            <!-- Botón toggle mostrar/ocultar confirmación de contraseña -->
+            <button
+              type="button"
+              @click="showConfirmPassword = !showConfirmPassword"
+              class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1 rounded"
+              :title="showConfirmPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+            >
+              <!-- Icono ojo abierto (mostrar) -->
+              <svg v-if="!showConfirmPassword" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z" />
+              </svg>
+              <!-- Icono ojo cerrado (ocultar) -->
+              <svg v-else class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M11.83,9L15,12.16C15,12.11 15,12.05 15,12A3,3 0 0,0 12,9C11.94,9 11.89,9 11.83,9M7.53,9.8L9.08,11.35C9.03,11.56 9,11.77 9,12A3,3 0 0,0 12,15C12.22,15 12.44,14.97 12.65,14.92L14.2,16.47C13.53,16.8 12.79,17 12,17A5,5 0 0,1 7,12C7,11.21 7.2,10.47 7.53,9.8M2,4.27L4.28,6.55L4.73,7C3.08,8.3 1.78,10 1,12C2.73,16.39 7,19.5 12,19.5C13.55,19.5 15.03,19.2 16.38,18.66L16.81,19.09L19.73,22L21,20.73L3.27,3M12,7A5,5 0 0,1 17,12C17,12.64 16.87,13.26 16.64,13.82L19.57,16.75C21.07,15.5 22.27,13.86 23,12C21.27,7.61 17,4.5 12,4.5C10.6,4.5 9.26,4.75 8,5.2L10.17,7.35C10.76,7.13 11.37,7 12,7Z" />
+              </svg>
+            </button>
           </div>
         </div>
 
@@ -118,7 +152,7 @@
         <div v-if="!isRegisterMode" class="flex items-center gap-2">
           <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-600">
             <input v-model="rememberMe" type="checkbox" class="m-0 w-auto accent-blue-500" />
-            Guardar sesión
+            Guardar Sesión
           </label>
         </div>
 
@@ -222,6 +256,10 @@ const confirmPassword = ref('')
 const rememberMe = ref(false)
 const isRegisterMode = ref(false)
 
+// Estados para mostrar/ocultar contraseñas
+const showPassword = ref(false)
+const showConfirmPassword = ref(false)
+
 const handleLogin = async () => {
   // Validación para registro
   if (isRegisterMode.value && password.value !== confirmPassword.value) {
@@ -252,5 +290,8 @@ const toggleRegister = () => {
   isRegisterMode.value = !isRegisterMode.value
   error.value = null
   confirmPassword.value = ''
+  // Reset password visibility cuando cambias de modo
+  showPassword.value = false
+  showConfirmPassword.value = false
 }
 </script>
