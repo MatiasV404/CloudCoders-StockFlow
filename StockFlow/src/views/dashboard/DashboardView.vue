@@ -1,3 +1,7 @@
+<script setup>
+import DashboardLayout from '../../components/layout/DashboardLayout.vue'
+</script>
+
 <template>
   <DashboardLayout>
     <div class="dashboard-content" data-aos="fade-up">
@@ -60,10 +64,6 @@
     </div>
   </DashboardLayout>
 </template>
-
-<script setup>
-import DashboardLayout from '../../components/layout/DashboardLayout.vue'
-</script>
 
 <style scoped>
 .dashboard-content {
@@ -174,28 +174,5 @@ import DashboardLayout from '../../components/layout/DashboardLayout.vue'
 
 .action-icon {
   font-size: 1.5rem;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .welcome-card {
-    padding: 20px;
-  }
-  
-  .welcome-card h2 {
-    font-size: 1.5rem;
-  }
-  
-  .stat-card {
-    padding: 20px;
-  }
-  
-  .actions-grid {
-    grid-template-columns: 1fr;
-  }
 }
 </style>

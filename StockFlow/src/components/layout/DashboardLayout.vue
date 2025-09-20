@@ -1,12 +1,35 @@
+<script setup>
+import { ref, provide, computed } from 'vue'
+import { useRoute } from 'vue-router'
+import { useAuth } from '../../composables/useAuth.js'
+import Sidebar from './Sidebar.vue'
+
+const { logout } = useAuth()
+const route = useRoute()
+
+// Estado del sidebar
+const sidebarCollapsed = ref(false)
+
+// Provide para compartir estado con Sidebar
+provide('sidebarCollapsed', sidebarCollapsed)
+
+// Computed para título de página
+const pageTitle = computed(() => {
+  const titles = {
+    dashboard: 'Dashboard',
+    inventory: 'Inventario',
+    products: 'Productos',
+    reports: 'Reportes',
+    settings: 'Configuración'
+  }
+  
+  const routeName = route.name?.toLowerCase() || 'dashboard'
+  return titles[routeName] || 'Dashboard'
+})
+</script>
+
 <template>
   <div class="dashboard-layout">
-    <!-- Overlay para móvil -->
-    <div 
-      v-if="isMobile && !sidebarCollapsed" 
-      class="mobile-overlay"
-      @click="sidebarCollapsed = true"
-    ></div>
-
     <!-- Sidebar -->
     <Sidebar />
 
@@ -15,15 +38,6 @@
       <!-- Header -->
       <header class="content-header">
         <div class="header-left">
-          <button 
-            v-if="isMobile" 
-            @click="toggleSidebar" 
-            class="mobile-menu-btn"
-          >
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M3,6H21V8H3V6M3,11H21V13H3V11M3,16H21V18H3V16Z" />
-            </svg>
-          </button>
           <h1 class="page-title">{{ pageTitle }}</h1>
         </div>
 
@@ -45,74 +59,11 @@
   </div>
 </template>
 
-<script setup>
-import { ref, provide, computed, onMounted, onUnmounted } from 'vue'
-import { useRoute } from 'vue-router'
-import { useAuth } from '../../composables/useAuth.js'
-import Sidebar from './Sidebar.vue'
-
-const { logout } = useAuth()
-const route = useRoute()
-
-// Estado responsivo
-const isMobile = ref(false)
-const sidebarCollapsed = ref(false)
-
-// Provide para compartir estado con Sidebar
-provide('sidebarCollapsed', sidebarCollapsed)
-
-// Computed para título de página
-const pageTitle = computed(() => {
-  const titles = {
-    dashboard: 'Dashboard',
-    inventory: 'Inventario',
-    products: 'Productos',
-    reports: 'Reportes',
-    settings: 'Configuración'
-  }
-  
-  const routeName = route.name?.toLowerCase() || 'dashboard'
-  return titles[routeName] || 'Dashboard'
-})
-
-// Funciones
-const toggleSidebar = () => {
-  sidebarCollapsed.value = !sidebarCollapsed.value
-}
-
-const checkMobile = () => {
-  isMobile.value = window.innerWidth <= 768
-  if (isMobile.value) {
-    sidebarCollapsed.value = true
-  }
-}
-
-// Lifecycle
-onMounted(() => {
-  checkMobile()
-  window.addEventListener('resize', checkMobile)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('resize', checkMobile)
-})
-</script>
-
 <style scoped>
 .dashboard-layout {
   display: flex;
   min-height: 100vh;
   background: #f8f9fa;
-}
-
-.mobile-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 999;
 }
 
 .main-content {
@@ -139,26 +90,6 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 16px;
-}
-
-.mobile-menu-btn {
-  display: none;
-  background: none;
-  border: none;
-  color: #4285f4;
-  padding: 8px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.mobile-menu-btn:hover {
-  background: #f0f2f5;
-}
-
-.mobile-menu-btn svg {
-  width: 24px;
-  height: 24px;
 }
 
 .page-title {
@@ -201,38 +132,5 @@ onUnmounted(() => {
   padding: 30px;
   max-width: 1200px;
   margin: 0 auto;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .mobile-menu-btn {
-    display: block;
-  }
-  
-  .content-header {
-    padding: 16px 20px;
-  }
-  
-  .page-title {
-    font-size: 1.5rem;
-  }
-  
-  .page-content {
-    padding: 20px;
-  }
-  
-  .btn-logout span {
-    display: none;
-  }
-}
-
-@media (max-width: 480px) {
-  .page-content {
-    padding: 16px;
-  }
-  
-  .content-header {
-    padding: 12px 16px;
-  }
 }
 </style>

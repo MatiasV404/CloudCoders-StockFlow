@@ -260,24 +260,4 @@ const userInitials = computed(() => {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
-/* Responsivo */
-@media (max-width: 768px) {
-  .sidebar {
-    width: 280px;
-    position: fixed;
-    left: -280px;
-    z-index: 1000;
-    transition: left 0.3s ease;
-  }
-  
-  .sidebar.collapsed {
-    left: -280px;
-    width: 280px;
-  }
-  
-  .sidebar.mobile-open {
-    left: 0;
-  }
-}
 </style>

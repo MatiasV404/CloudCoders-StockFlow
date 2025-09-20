@@ -1,4 +1,3 @@
-
 <script setup>
 import { ref } from 'vue'
 import { useAuth } from '../../composables/useAuth.js'
@@ -35,7 +34,6 @@ const toggleRegister = () => {
   error.value = null
 }
 </script>
-
 
 <template>
   <div class="login-container">
@@ -307,24 +305,5 @@ const toggleRegister = () => {
   color: #888;
   margin: 0;
   line-height: 1.4;
-}
-
-/* Responsivo */
-@media (max-width: 480px) {
-  .login-container {
-    padding: 10px;
-  }
-  
-  .login-card {
-    padding: 30px 20px;
-  }
-  
-  .brand {
-    font-size: 2rem;
-  }
-  
-  .footer p {
-    font-size: 0.7rem;
-  }
 }
 </style>
