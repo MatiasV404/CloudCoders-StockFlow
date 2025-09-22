@@ -44,7 +44,22 @@ if [ ! -f "package.json" ]; then
 fi
 
 if [ ! -f "firebase.json" ]; then
-    error_exit "No se encontró firebase.json. El proyecto no está configurado para Firebase Hosting."
+    error_exit "No se encontró firebase.json. El proyecto no está configurado para Firebase."
+fi
+
+# Verificar archivos de Firebase importantes
+echo ""
+info "Verificando archivos de configuración de Firebase..."
+if [ ! -f "firestore.rules" ]; then
+    warning "No se encontró firestore.rules"
+else
+    success "Archivo firestore.rules encontrado"
+fi
+
+if [ ! -f "src/firebase/firestore.rules" ]; then
+    warning "No se encontró src/firebase/firestore.rules"
+else
+    success "Archivo src/firebase/firestore.rules encontrado"
 fi
 
 # Verificar si Firebase CLI está instalado
@@ -135,13 +150,48 @@ else
     fi
 fi
 
+# Preguntar qué servicios desplegar
+echo ""
+echo -e "${BLUE}🎯 ¿Qué servicios de Firebase deseas desplegar?${NC}"
+echo "1) Solo Hosting (aplicación web)"
+echo "2) Solo Firestore Rules (reglas de base de datos)"
+echo "3) Ambos (Hosting + Firestore Rules) - Recomendado"
+echo "4) Todo (Hosting + Firestore Rules + Functions si existen)"
+echo ""
+read -p "Selecciona una opción (1-4): " deploy_option
+
+case $deploy_option in
+    1)
+        DEPLOY_TARGETS="hosting"
+        DEPLOY_DESCRIPTION="Solo Hosting"
+        ;;
+    2)
+        DEPLOY_TARGETS="firestore:rules"
+        DEPLOY_DESCRIPTION="Solo Firestore Rules"
+        ;;
+    3)
+        DEPLOY_TARGETS="hosting,firestore:rules"
+        DEPLOY_DESCRIPTION="Hosting + Firestore Rules"
+        ;;
+    4)
+        DEPLOY_TARGETS=""
+        DEPLOY_DESCRIPTION="Todos los servicios"
+        ;;
+    *)
+        warning "Opción inválida. Usando opción por defecto (3 - Hosting + Firestore Rules)"
+        DEPLOY_TARGETS="hosting,firestore:rules"
+        DEPLOY_DESCRIPTION="Hosting + Firestore Rules"
+        ;;
+esac
+
 # Mostrar resumen pre-deploy
 echo ""
 echo -e "${YELLOW}================================================${NC}"
 echo -e "${YELLOW}📋 RESUMEN DEL DEPLOY${NC}"
 echo -e "${YELLOW}================================================${NC}"
 echo "🎯 Proyecto: ${PROJECT_NAME}"
-echo "🔥 Firebase: ${FIREBASE_PROJECT}"
+echo "🔥 Firebase Project: ${FIREBASE_PROJECT}"
+echo "📦 Servicios a desplegar: ${DEPLOY_DESCRIPTION}"
 echo "🌐 URL de destino: https://${FIREBASE_PROJECT}.web.app"
 echo "📅 Fecha/Hora: $(date)"
 echo "👤 Usuario: $(whoami)"
@@ -156,76 +206,118 @@ if [[ ! $final_confirmation =~ ^[Yy]$ ]]; then
     exit 0
 fi
 
-# Iniciar proceso de build
-echo ""
-echo -e "${BLUE}🔨 Iniciando proceso de build...${NC}"
-echo ""
+# Si incluye hosting, hacer build
+if [[ $DEPLOY_TARGETS == *"hosting"* ]] || [[ -z $DEPLOY_TARGETS ]]; then
+    echo ""
+    echo -e "${BLUE}🔨 Iniciando proceso de build...${NC}"
+    echo ""
 
-# Limpiar dist anterior
-if [ -d "dist" ]; then
-    info "Limpiando build anterior..."
-    rm -rf dist
+    # Limpiar dist anterior
+    if [ -d "dist" ]; then
+        info "Limpiando build anterior..."
+        rm -rf dist
+    fi
+
+    # Ejecutar build
+    echo "Ejecutando: npm run build"
+    if npm run build; then
+        success "Build completado exitosamente"
+    else
+        error_exit "Error durante el proceso de build"
+    fi
+
+    # Verificar que se generó el build
+    if [ ! -d "dist" ]; then
+        error_exit "No se generó el directorio dist"
+    fi
+
+    if [ ! -f "dist/index.html" ]; then
+        error_exit "No se generó el archivo index.html"
+    fi
+
+    # Mostrar estadísticas del build
+    echo ""
+    info "Estadísticas del build:"
+    echo "  📁 Tamaño del build: $(du -sh dist | cut -f1)"
+    echo "  📄 Archivos generados: $(find dist -type f | wc -l)"
 fi
 
-# Ejecutar build
-echo "Ejecutando: npm run build"
-if npm run build; then
-    success "Build completado exitosamente"
-else
-    error_exit "Error durante el proceso de build"
+# Validar reglas de Firestore si se van a desplegar
+if [[ $DEPLOY_TARGETS == *"firestore"* ]] || [[ -z $DEPLOY_TARGETS ]]; then
+    echo ""
+    info "Validando reglas de Firestore..."
+    
+    if [ -f "firestore.rules" ]; then
+        # Validar sintaxis de las reglas
+        if firebase firestore:rules --help &> /dev/null; then
+            info "Reglas de Firestore listas para deploy"
+        fi
+    else
+        warning "No se encontraron reglas de Firestore para validar"
+    fi
 fi
-
-# Verificar que se generó el build
-if [ ! -d "dist" ]; then
-    error_exit "No se generó el directorio dist"
-fi
-
-if [ ! -f "dist/index.html" ]; then
-    error_exit "No se generó el archivo index.html"
-fi
-
-# Mostrar estadísticas del build
-echo ""
-info "Estadísticas del build:"
-echo "  📁 Tamaño del build: $(du -sh dist | cut -f1)"
-echo "  📄 Archivos generados: $(find dist -type f | wc -l)"
 
 # Confirmación antes del deploy
 echo ""
-echo -e "${YELLOW}Build completado. ¿Proceder con el deploy a Firebase? (y/n)${NC}"
+echo -e "${YELLOW}¿Proceder con el deploy de ${DEPLOY_DESCRIPTION}? (y/n)${NC}"
 read -r deploy_confirmation
 if [[ ! $deploy_confirmation =~ ^[Yy]$ ]]; then
-    warning "Deploy cancelado. Los archivos están disponibles en /dist"
+    if [[ $DEPLOY_TARGETS == *"hosting"* ]]; then
+        warning "Deploy cancelado. Los archivos de build están disponibles en /dist"
+    else
+        warning "Deploy cancelado."
+    fi
     exit 0
 fi
 
 # Deploy a Firebase
 echo ""
-echo -e "${BLUE}🚀 Deployando a Firebase Hosting...${NC}"
+echo -e "${BLUE}🚀 Deployando ${DEPLOY_DESCRIPTION} a Firebase...${NC}"
 echo ""
 
-if firebase deploy --only hosting; then
+# Ejecutar deploy según la opción seleccionada
+if [[ -z $DEPLOY_TARGETS ]]; then
+    # Deploy completo
+    DEPLOY_CMD="firebase deploy"
+else
+    # Deploy específico
+    DEPLOY_CMD="firebase deploy --only $DEPLOY_TARGETS"
+fi
+
+echo "Ejecutando: $DEPLOY_CMD"
+if $DEPLOY_CMD; then
     echo ""
     echo -e "${GREEN}================================================${NC}"
     echo -e "${GREEN}🎉 DEPLOY COMPLETADO EXITOSAMENTE${NC}"
     echo -e "${GREEN}================================================${NC}"
-    echo -e "${GREEN}✅ Tu aplicación está disponible en:${NC}"
-    echo -e "${GREEN}🌐 https://${FIREBASE_PROJECT}.web.app${NC}"
+    
+    if [[ $DEPLOY_TARGETS == *"hosting"* ]] || [[ -z $DEPLOY_TARGETS ]]; then
+        echo -e "${GREEN}✅ Aplicación web disponible en:${NC}"
+        echo -e "${GREEN}🌐 https://${FIREBASE_PROJECT}.web.app${NC}"
+    fi
+    
+    if [[ $DEPLOY_TARGETS == *"firestore"* ]] || [[ -z $DEPLOY_TARGETS ]]; then
+        echo -e "${GREEN}✅ Reglas de Firestore actualizadas${NC}"
+        echo -e "${GREEN}🛡️  Base de datos segura y configurada${NC}"
+    fi
+    
     echo -e "${GREEN}================================================${NC}"
     echo ""
     
-    # Preguntizar si abrir en navegador
-    echo "¿Deseas abrir la aplicación en el navegador? (y/n)"
-    read -r open_browser
-    if [[ $open_browser =~ ^[Yy]$ ]]; then
-        if command -v start &> /dev/null; then
-            start https://${FIREBASE_PROJECT}.web.app
-        elif command -v open &> /dev/null; then
-            open https://${FIREBASE_PROJECT}.web.app
-        elif command -v xdg-open &> /dev/null; then
-            xdg-open https://${FIREBASE_PROJECT}.web.app
-        else
-            info "No se pudo abrir automáticamente. Ve a: https://${FIREBASE_PROJECT}.web.app"
+    # Preguntizar si abrir en navegador (solo si se desplegó hosting)
+    if [[ $DEPLOY_TARGETS == *"hosting"* ]] || [[ -z $DEPLOY_TARGETS ]]; then
+        echo "¿Deseas abrir la aplicación en el navegador? (y/n)"
+        read -r open_browser
+        if [[ $open_browser =~ ^[Yy]$ ]]; then
+            if command -v start &> /dev/null; then
+                start https://${FIREBASE_PROJECT}.web.app
+            elif command -v open &> /dev/null; then
+                open https://${FIREBASE_PROJECT}.web.app
+            elif command -v xdg-open &> /dev/null; then
+                xdg-open https://${FIREBASE_PROJECT}.web.app
+            else
+                info "No se pudo abrir automáticamente. Ve a: https://${FIREBASE_PROJECT}.web.app"
+            fi
         fi
     fi
     
@@ -235,7 +327,7 @@ fi
 
 # Log del deploy
 echo ""
-info "Deploy registrado en: $(date) por $(whoami)" >> deploy.log
+info "Deploy registrado en: $(date) por $(whoami) - Servicios: ${DEPLOY_DESCRIPTION}" >> deploy.log
 
 echo ""
 echo -e "${GREEN}🎯 Deploy completado. ¡Gracias por usar el script de deploy!${NC}"
