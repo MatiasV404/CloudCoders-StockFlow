@@ -1,7 +1,7 @@
 <template>
   <DashboardLayout>
     <div class="w-full max-w-7xl mx-auto px-4 sm:px-6">
-      
+
       <!-- Header con estadísticas -->
       <div class="mb-8">
         <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-xl mb-6">
@@ -54,58 +54,101 @@
       </div>
 
       <!-- Controles de búsqueda y filtros -->
-      <div class="bg-white p-6 rounded-xl shadow-sm mb-6">
-        <div class="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
-          <!-- Búsqueda -->
-          <div class="flex-1 max-w-md">
+      <div class="bg-white p-4 sm:p-6 rounded-xl shadow-sm mb-6">
+        <div class="flex flex-col gap-4">
+
+          <!-- Row 1: Búsqueda -->
+          <div class="w-full">
             <div class="relative">
-              <input
-                v-model="searchTerm"
-                type="text"
-                placeholder="Buscar productos..."
-                class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+              <input v-model="searchTerm" type="text" placeholder="Buscar productos..."
+                class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
               <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <svg class="w-5 h-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z" />
+                  <path
+                    d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z" />
                 </svg>
               </div>
             </div>
           </div>
 
-          <!-- Filtros -->
-          <div class="flex gap-3">
-            <select 
-              v-model="selectedCategory"
-              class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="">Todas las categorías</option>
-              <option v-for="category in categories" :key="category" :value="category">
-                {{ category }}
-              </option>
-            </select>
+          <!-- Row 2: Filtros y Botón - Responsivo -->
+          <div class="flex flex-col sm:flex-row gap-3 sm:items-center">
 
-            <select 
-              v-model="selectedStatus"
-              class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="">Todos los estados</option>
-              <option v-for="status in statuses" :key="status" :value="status">
-                {{ status }}
-              </option>
-            </select>
+            <!-- Contenedor de filtros -->
+            <div class="flex flex-col sm:flex-row gap-3 flex-1">
+              <select v-model="selectedCategory"
+                class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <option value="">Todas las categorías</option>
+                <option v-for="category in categories" :key="category" :value="category">
+                  {{ category }}
+                </option>
+              </select>
+
+              <select v-model="selectedStatus"
+                class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <option value="">Todos los estados</option>
+                <option v-for="status in statuses" :key="status" :value="status">
+                  {{ status }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Botón agregar -->
+            <button @click="showAddModal = true"
+              class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 whitespace-nowrap sm:w-auto">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" />
+              </svg>
+              <span class="hidden sm:inline">Agregar Producto</span>
+              <span class="sm:hidden">Agregar</span>
+            </button>
           </div>
 
-          <!-- Botón agregar -->
-          <button
-            @click="showAddModal = true"
-            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 whitespace-nowrap"
-          >
-            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" />
-            </svg>
-            Agregar Producto
-          </button>
+          <!-- Indicadores de filtros activos (opcional) -->
+          <div v-if="searchTerm || selectedCategory || selectedStatus" class="flex flex-wrap gap-2">
+            <span v-if="searchTerm"
+              class="inline-flex items-center gap-1 bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
+              Búsqueda: "{{ searchTerm }}"
+              <button @click="searchTerm = ''" class="hover:bg-blue-200 rounded-full p-0.5">
+                <svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
+                  <path
+                    d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" />
+                </svg>
+              </button>
+            </span>
+
+            <span v-if="selectedCategory"
+              class="inline-flex items-center gap-1 bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-xs">
+              Categoría: {{ selectedCategory }}
+              <button @click="selectedCategory = ''" class="hover:bg-purple-200 rounded-full p-0.5">
+                <svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
+                  <path
+                    d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" />
+                </svg>
+              </button>
+            </span>
+
+            <span v-if="selectedStatus"
+              class="inline-flex items-center gap-1 bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">
+              Estado: {{ selectedStatus }}
+              <button @click="selectedStatus = ''" class="hover:bg-green-200 rounded-full p-0.5">
+                <svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
+                  <path
+                    d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" />
+                </svg>
+              </button>
+            </span>
+
+            <!-- Botón limpiar todo -->
+            <button @click="clearAllFilters"
+              class="inline-flex items-center gap-1 bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-xs hover:bg-gray-200 transition-colors">
+              <svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
+                <path
+                  d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" />
+              </svg>
+              Limpiar filtros
+            </button>
+          </div>
         </div>
       </div>
 
@@ -121,9 +164,11 @@
             <thead class="bg-gray-50">
               <tr>
                 <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Código/SKU</th>
+                <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Código/SKU
+                </th>
                 <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-                <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
+                <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Categoría
+                </th>
                 <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Stock</th>
                 <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Precio</th>
                 <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Estado</th>
@@ -135,7 +180,8 @@
                 <td colspan="8" class="px-6 py-8 text-center text-gray-500">
                   <div class="flex flex-col items-center gap-2">
                     <svg class="w-12 h-12 text-gray-300" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M19,3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3M19,5V19H5V5H19Z" />
+                      <path
+                        d="M19,3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3M19,5V19H5V5H19Z" />
                     </svg>
                     <p class="text-lg font-medium">No hay productos</p>
                     <p class="text-sm">Comienza agregando tu primer producto</p>
@@ -151,10 +197,12 @@
                 </td>
                 <td class="px-6 py-4">
                   <div class="text-sm font-medium text-gray-900">{{ product.name }}</div>
-                  <div v-if="product.description" class="text-sm text-gray-500 max-w-xs truncate">{{ product.description }}</div>
+                  <div v-if="product.description" class="text-sm text-gray-500 max-w-xs truncate">{{ product.description
+                    }}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  <span
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                     {{ product.category }}
                   </span>
                 </td>
@@ -172,27 +220,22 @@
                   ${{ formatCurrency(product.price) }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" 
-                        :class="getStatusClass(product.status)">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                    :class="getStatusClass(product.status)">
                     {{ product.status }}
                   </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div class="flex gap-2">
-                    <button
-                      @click="editProduct(product)"
-                      class="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50"
-                      title="Editar"
-                    >
+                    <button @click="editProduct(product)"
+                      class="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50" title="Editar">
                       <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" />
+                        <path
+                          d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" />
                       </svg>
                     </button>
-                    <button
-                      @click="confirmDelete(product)"
-                      class="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
-                      title="Eliminar"
-                    >
+                    <button @click="confirmDelete(product)"
+                      class="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50" title="Eliminar">
                       <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
                       </svg>
@@ -206,25 +249,13 @@
       </div>
 
       <!-- Modal Agregar/Editar -->
-      <ProductModal
-        :show="showAddModal || showEditModal"
-        :product="selectedProduct"
-        :categories="categories"
-        :statuses="statuses"
-        @close="closeModal"
-        @save="handleSave"
-      />
+      <ProductModal :show="showAddModal || showEditModal" :product="selectedProduct" :categories="categories"
+        :statuses="statuses" @close="closeModal" @save="handleSave" />
 
       <!-- Modal Confirmación Eliminar -->
-      <ConfirmModal
-        :show="showDeleteModal"
-        :title="`¿Eliminar ${productToDelete?.name}?`"
-        :message="'Esta acción no se puede deshacer.'"
-        :confirmText="'Eliminar'"
-        :confirmClass="'bg-red-600 hover:bg-red-700'"
-        @confirm="handleDelete"
-        @cancel="showDeleteModal = false"
-      />
+      <ConfirmModal :show="showDeleteModal" :title="`¿Eliminar ${productToDelete?.name}?`"
+        :message="'Esta acción no se puede deshacer.'" :confirmText="'Eliminar'"
+        :confirmClass="'bg-red-600 hover:bg-red-700'" @confirm="handleDelete" @cancel="showDeleteModal = false" />
     </div>
   </DashboardLayout>
 </template>
@@ -272,7 +303,7 @@ let unsubscribe = null
 onMounted(async () => {
   await loadProducts()
   unsubscribe = subscribeToProducts()
-  
+
   // Verificar si viene de dashboard con query param para agregar
   if (route.query.action === 'add') {
     showAddModal.value = true
@@ -312,6 +343,13 @@ const filteredProducts = computed(() => {
 // Funciones de utilidad
 const formatCurrency = (amount) => {
   return new Intl.NumberFormat('es-CL').format(amount)
+}
+
+// Función para limpiar todos los filtros
+const clearAllFilters = () => {
+  searchTerm.value = ''
+  selectedCategory.value = ''
+  selectedStatus.value = ''
 }
 
 const getStatusClass = (status) => {
