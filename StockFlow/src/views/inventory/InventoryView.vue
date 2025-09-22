@@ -231,10 +231,13 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import DashboardLayout from '../../components/layout/DashboardLayout.vue'
 import ProductModal from '../../components/inventory/ProductModal.vue'
 import ConfirmModal from '../../components/common/ConfirmModal.vue'
 import { useProducts } from '../../composables/useProducts.js'
+
+const route = useRoute()
 
 const {
   products,
@@ -252,6 +255,7 @@ const {
   filterByStatus
 } = useProducts()
 
+
 // Estado local
 const searchTerm = ref('')
 const selectedCategory = ref('')
@@ -268,10 +272,22 @@ let unsubscribe = null
 onMounted(async () => {
   await loadProducts()
   unsubscribe = subscribeToProducts()
+  
+  // Verificar si viene de dashboard con query param para agregar
+  if (route.query.action === 'add') {
+    showAddModal.value = true
+  }
 })
 
 onUnmounted(() => {
   if (unsubscribe) unsubscribe()
+})
+
+// Watcher para query params
+watch(() => route.query.action, (action) => {
+  if (action === 'add') {
+    showAddModal.value = true
+  }
 })
 
 // Productos filtrados
