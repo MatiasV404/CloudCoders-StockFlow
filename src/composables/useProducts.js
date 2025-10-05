@@ -7,33 +7,46 @@ import {
   doc, 
   getDocs, 
   query, 
-  where, 
   orderBy,
-  onSnapshot
+  where,
+  onSnapshot,
+  getDoc
 } from 'firebase/firestore'
 import { db } from '../firebase/firebase.js'
 import { useAuth } from './useAuth.js'
 
 export function useProducts() {
-  const { user } = useAuth()
+  const { user, userProfile } = useAuth()
+  
   const products = ref([])
   const loading = ref(false)
   const error = ref(null)
+  const adminUserId = ref(null)
 
   // Categorías disponibles
   const categories = [
-    'Computadoras',
-    'Periféricos', 
-    'Impresoras',
-    'Monitores',
-    'Accesorios',
-    'Software',
-    'Hardware',
-    'Networking',
+    'Electrónica',
+    'Ropa',
+    'Alimentos',
+    'Hogar',
+    'Deportes',
+    'Juguetes',
+    'Libros',
+    'Salud',
+    'Belleza',
+    'Automotriz',
+    'Mascotas',
+    'Jardinería',
+    'Oficina',
+    'Bebés',
+    'Música',
+    'Herramientas',
+    'Construcción',
+    'Tecnología',
+    'Muebles',
     'Otros'
   ]
 
-  // Estados de producto
   const statuses = [
     'Activo',
     'Inactivo',
@@ -41,63 +54,125 @@ export function useProducts() {
     'Descontinuado'
   ]
 
-  // Referencia a la colección de productos del usuario
-  const getProductsCollection = () => {
-    if (!user.value?.uid) {
-      throw new Error('Usuario no autenticado')
-    }
-    return collection(db, `users/${user.value.uid}/products`)
+  const generateProductId = () => {
+    const timestamp = Date.now().toString(36).toUpperCase()
+    const random = Math.random().toString(36).substring(2, 8).toUpperCase()
+    return `PRD-${timestamp}-${random}`
   }
 
-  // Cargar productos del usuario
-  const loadProducts = async () => {
-    if (!user.value?.uid) {
-      error.value = 'Usuario no autenticado'
-      return
+  // Buscar el UID del admin
+  const findAdminUserId = async () => {
+    if (!user.value?.uid || !userProfile.value?.projectCode) {
+      return null
     }
 
     try {
+      if (userProfile.value.role === 'admin') {
+        return user.value.uid
+      }
+
+      const usersRef = collection(db, 'users')
+      const q = query(
+        usersRef, 
+        where('projectCode', '==', userProfile.value.projectCode),
+        where('role', '==', 'admin')
+      )
+      const querySnapshot = await getDocs(q)
+
+      if (!querySnapshot.empty) {
+        return querySnapshot.docs[0].id
+      }
+
+      return null
+    } catch (err) {
+      console.error('Error buscando admin:', err)
+      return null
+    }
+  }
+
+  const getProductsCollection = async () => {
+    if (!adminUserId.value) {
+      adminUserId.value = await findAdminUserId()
+    }
+
+    if (!adminUserId.value) {
+      throw new Error('No se pudo encontrar el administrador del proyecto')
+    }
+
+    return collection(db, `users/${adminUserId.value}/products`)
+  }
+
+  // Stats computados
+  const stats = computed(() => {
+    const totalProducts = products.value.length
+    const lowStock = products.value.filter(p => p.stock > 0 && p.stock <= (p.minStock || 5)).length
+    const outOfStock = products.value.filter(p => p.stock === 0).length
+    const totalValue = products.value.reduce((sum, p) => sum + (p.price * p.stock), 0)
+
+    return {
+      totalProducts,
+      lowStock,
+      outOfStock,
+      totalValue
+    }
+  })
+
+  // Cargar productos
+  const loadProducts = async () => {
+    try {
       loading.value = true
       error.value = null
-      
-      const productsRef = getProductsCollection()
+
+      const productsRef = await getProductsCollection()
       const q = query(productsRef, orderBy('createdAt', 'desc'))
       const querySnapshot = await getDocs(q)
-      
+
       products.value = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }))
-      
     } catch (err) {
       console.error('Error cargando productos:', err)
       error.value = 'Error al cargar productos'
+      throw err
     } finally {
       loading.value = false
     }
   }
 
-  // Escuchar cambios en tiempo real
-  const subscribeToProducts = () => {
-    if (!user.value?.uid) return null
+  // Suscripción en tiempo real
+  const subscribeToProducts = async () => {
+    if (!user.value?.uid) {
+      console.warn('⚠️ No se puede suscribir: usuario no autenticado')
+      return null
+    }
 
     try {
-      const productsRef = getProductsCollection()
-      const q = query(productsRef, orderBy('createdAt', 'desc'))
-      
-      return onSnapshot(q, (querySnapshot) => {
-        products.value = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }))
-      })
+      const productsRef = await getProductsCollection()
+      const q = query(productsRef, orderBy("createdAt", "desc"))
+
+      const unsubscribeFn = onSnapshot(
+        q,
+        (querySnapshot) => {
+          products.value = querySnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }))
+        },
+        (err) => {
+          console.error("❌ Error en suscripción:", err)
+          error.value = "Error al sincronizar productos: " + err.message
+        }
+      )
+
+      return unsubscribeFn
     } catch (err) {
-      console.error('Error suscribiéndose a productos:', err)
+      console.error("❌ Error suscribiéndose a productos:", err)
+      error.value = "Error al suscribirse: " + err.message
       return null
     }
   }
 
-  // Agregar producto
   const addProduct = async (productData) => {
     if (!user.value?.uid) {
       throw new Error('Usuario no autenticado')
@@ -107,12 +182,17 @@ export function useProducts() {
       loading.value = true
       error.value = null
 
-      const productsRef = getProductsCollection()
+      const productsRef = await getProductsCollection()
+      
+      const productId = generateProductId()
+      
       const newProduct = {
         ...productData,
+        productId,
         createdAt: new Date(),
         updatedAt: new Date(),
-        userId: user.value.uid
+        addedBy: user.value.uid,
+        userId: adminUserId.value
       }
 
       const docRef = await addDoc(productsRef, newProduct)
@@ -137,13 +217,14 @@ export function useProducts() {
       loading.value = true
       error.value = null
 
-      const productRef = doc(db, `users/${user.value.uid}/products/${productId}`)
-      const updatedProduct = {
-        ...productData,
-        updatedAt: new Date()
-      }
+      const productsRef = await getProductsCollection()
+      const productRef = doc(productsRef, productId)
 
-      await updateDoc(productRef, updatedProduct)
+      await updateDoc(productRef, {
+        ...productData,
+        updatedAt: new Date(),
+        updatedBy: user.value.uid
+      })
       
     } catch (err) {
       console.error('Error actualizando producto:', err)
@@ -164,7 +245,9 @@ export function useProducts() {
       loading.value = true
       error.value = null
 
-      const productRef = doc(db, `users/${user.value.uid}/products/${productId}`)
+      const productsRef = await getProductsCollection()
+      const productRef = doc(productsRef, productId)
+
       await deleteDoc(productRef)
       
     } catch (err) {
@@ -176,46 +259,20 @@ export function useProducts() {
     }
   }
 
-  // Computed para estadísticas
-  const stats = computed(() => {
-    const totalProducts = products.value.length
-    const lowStock = products.value.filter(p => p.stock <= (p.minStock || 5)).length
-    const outOfStock = products.value.filter(p => p.stock === 0).length
-    const totalValue = products.value.reduce((sum, p) => sum + (p.price * p.stock), 0)
-    const activeProducts = products.value.filter(p => p.status === 'Activo').length
-
-    return {
-      totalProducts,
-      lowStock,
-      outOfStock,
-      totalValue,
-      activeProducts
-    }
-  })
+  const findProductByProductId = (productId) => {
+    return products.value.find(p => p.productId === productId)
+  }
 
   // Buscar productos
   const searchProducts = (searchTerm) => {
-    if (!searchTerm.trim()) return products.value
-
     const term = searchTerm.toLowerCase()
     return products.value.filter(product => 
-      product.name?.toLowerCase().includes(term) ||
+      product.name.toLowerCase().includes(term) ||
       product.code?.toLowerCase().includes(term) ||
       product.sku?.toLowerCase().includes(term) ||
+      product.productId?.toLowerCase().includes(term) ||
       product.category?.toLowerCase().includes(term)
     )
-  }
-
-  // Filtrar productos por categoría
-  const filterByCategory = (category) => {
-    if (!category) return products.value
-    return products.value.filter(product => product.category === category)
-  }
-
-  // Filtrar productos por estado
-  const filterByStatus = (status) => {
-    if (!status) return products.value
-    return products.value.filter(product => product.status === status)
   }
 
   return {
@@ -231,7 +288,6 @@ export function useProducts() {
     updateProduct,
     deleteProduct,
     searchProducts,
-    filterByCategory,
-    filterByStatus
+    findProductByProductId
   }
 }

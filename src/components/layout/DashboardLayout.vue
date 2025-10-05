@@ -30,16 +30,17 @@
           <h1 class="text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-800 m-0 truncate">{{ pageTitle }}</h1>
         </div>
 
-        <div class="flex items-center gap-3 sm:gap-4">
-          <button 
-            @click="logout" 
-            class="flex items-center gap-2 bg-red-600 text-white border-0 px-3 py-2 rounded-lg font-medium cursor-pointer transition-colors hover:bg-red-700 text-sm"
+        <div class="flex items-center gap-3">
+          <button
+            @click="showLogoutModal = true"
+            :disabled="loggingOut"
+            class="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
           >
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M17,7L15.59,8.41L18.17,11H8V13H18.17L15.59,15.59L17,17L22,12L17,7M4,5H12V3H4C2.89,3 2,3.89 2,5V19A2,2 0 0,0 4,21H12V19H4V5Z" />
+              <path d="M16,17V14H9V10H16V7L21,12L16,17M14,2A2,2 0 0,1 16,4V6H14V4H5V20H14V18H16V20A2,2 0 0,1 14,22H5A2,2 0 0,1 3,20V4A2,2 0 0,1 5,2H14Z" />
             </svg>
-            <span class="hidden sm:inline">Cerrar Sesión</span>
-            <span class="sm:hidden">Salir</span>
+            <span class="hidden sm:inline">{{ loggingOut ? 'Saliendo...' : 'Cerrar Sesión' }}</span>
+            <span class="sm:hidden">{{ loggingOut ? '...' : 'Salir' }}</span>
           </button>
         </div>
       </header>
@@ -49,6 +50,31 @@
         <slot />
       </div>
     </main>
+
+    <!-- Modal de Logout -->
+    <ConfirmModal
+      :show="showLogoutModal"
+      type="warning"
+      title="¿Cerrar sesión?"
+      message="¿Estás seguro de que quieres cerrar sesión?"
+      confirmText="Cerrar Sesión"
+      cancelText="Cancelar"
+      :confirmClass="'bg-red-600 hover:bg-red-700 focus:ring-red-500'"
+      :loading="loggingOut"
+      @confirm="confirmLogout"
+      @cancel="showLogoutModal = false"
+    />
+
+    <!-- ✅ Toast de Error (usando componente) -->
+    <Toast
+      :show="showErrorToast"
+      type="error"
+      title="Error al cerrar sesión"
+      message="La página se recargará automáticamente"
+      :duration="3000"
+      position="bottom-right"
+      @close="showErrorToast = false"
+    />
   </div>
 </template>
 
@@ -57,19 +83,44 @@ import { ref, provide, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuth } from '../../composables/useAuth.js'
 import Sidebar from './Sidebar.vue'
+import ConfirmModal from '../common/ConfirmModal.vue'
+import Toast from '../common/Toast.vue'
 
 const { logout } = useAuth()
 const route = useRoute()
 
 // Estado del sidebar y móvil
-const sidebarCollapsed = ref(true) // Empieza cerrado en móvil
+const sidebarCollapsed = ref(true)
 const isMobile = ref(false)
+const loggingOut = ref(false)
+const showLogoutModal = ref(false)
+const showErrorToast = ref(false)
+
+// FUNCIÓN DE LOGOUT MEJORADA
+const confirmLogout = async () => {
+  try {
+    loggingOut.value = true
+    await logout()
+  } catch (err) {
+    console.error('❌ Error en logout desde layout:', err)
+    
+    showErrorToast.value = true
+    
+    // Recargar después de 3 segundos
+    setTimeout(() => {
+      window.location.href = '/login'
+    }, 3000)
+  } finally {
+    loggingOut.value = false
+    showLogoutModal.value = false
+  }
+}
 
 // Función para detectar móvil
 const checkMobile = () => {
-  isMobile.value = window.innerWidth < 1024 // lg breakpoint de Tailwind
+  isMobile.value = window.innerWidth < 1024
   if (isMobile.value) {
-    sidebarCollapsed.value = true // Fuerza cerrado en móvil
+    sidebarCollapsed.value = true
   }
 }
 
