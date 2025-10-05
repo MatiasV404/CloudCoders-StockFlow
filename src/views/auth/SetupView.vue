@@ -1,7 +1,19 @@
 <template>
   <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-600 p-5">
-    <div class="bg-white rounded-2xl shadow-2xl p-8 sm:p-10 w-full max-w-2xl">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 sm:p-10 w-full max-w-2xl relative">
       
+      <!-- Botón de cerrar sesión - Esquina superior derecha -->
+      <button
+        @click="handleLogout"
+        class="absolute top-4 right-4 flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors group"
+        title="Cerrar sesión"
+      >
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M16,17V14H9V10H16V7L21,12L16,17M14,2A2,2 0 0,1 16,4V6H14V4H5V20H14V18H16V20A2,2 0 0,1 14,22H5A2,2 0 0,1 3,20V4A2,2 0 0,1 5,2H14Z" />
+        </svg>
+        <span class="hidden sm:inline">Salir</span>
+      </button>
+
       <!-- Header -->
       <div class="text-center mb-8">
         <div class="flex items-center justify-center gap-2 mb-3">
@@ -14,6 +26,17 @@
         <p class="text-sm sm:text-base text-gray-600">
           {{ step === 1 ? 'Selecciona tu rol para comenzar' : 'Verifica tu información' }}
         </p>
+
+        <!-- Información de la cuenta activa -->
+        <div class="mt-4 inline-flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-lg border border-blue-200">
+          <div class="w-8 h-8 rounded-full bg-blue-200 flex items-center justify-center text-blue-700 font-semibold text-sm">
+            {{ userInitial }}
+          </div>
+          <div class="text-left">
+            <p class="text-xs text-gray-500 m-0">Configurando cuenta:</p>
+            <p class="text-sm font-medium text-gray-800 m-0">{{ userEmail }}</p>
+          </div>
+        </div>
       </div>
 
       <!-- Step 1: Selección de Rol -->
@@ -218,7 +241,7 @@ import { ref, computed } from 'vue'
 import { useAuth } from '../../composables/useAuth.js'
 import { useRouter } from 'vue-router'
 
-const { user, createUserProfile, verifyProjectCode } = useAuth()
+const { user, createUserProfile, verifyProjectCode, logout } = useAuth()
 const router = useRouter()
 
 const step = ref(1)
@@ -227,6 +250,16 @@ const projectCodeInput = ref('')
 const codeError = ref('')
 const error = ref('')
 const loading = ref(false)
+
+// Computed properties para mostrar info del usuario
+const userEmail = computed(() => {
+  return user.value?.email || 'usuario@email.com'
+})
+
+const userInitial = computed(() => {
+  const email = userEmail.value
+  return email.charAt(0).toUpperCase()
+})
 
 const generatedCode = computed(() => {
   return user.value?.uid.substring(0, 8).toUpperCase() || ''
@@ -247,10 +280,23 @@ const nextStep = () => {
 const copyCode = async () => {
   try {
     await navigator.clipboard.writeText(generatedCode.value)
-    // Opcional: Mostrar feedback visual
-    alert('Código copiado al portapapeles')
+    // Feedback visual con alert nativo
+    alert('✓ Código copiado al portapapeles')
   } catch (err) {
     console.error('Error copiando código:', err)
+    alert('✗ No se pudo copiar el código')
+  }
+}
+
+const handleLogout = async () => {
+  const confirmed = confirm('¿Estás seguro de que quieres cerrar sesión? Perderás el progreso de configuración.')
+  
+  if (confirmed) {
+    try {
+      await logout()
+    } catch (err) {
+      console.error('Error cerrando sesión:', err)
+    }
   }
 }
 
