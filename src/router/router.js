@@ -36,6 +36,16 @@ const routes = [
       requiresAuth: true,
       requiresRole: ['admin', 'operator']
     }
+  },
+  // Recuento Cíclico
+  {
+    path: '/cyclic-count',
+    name: 'CyclicCount',
+    component: () => import('../views/inventory/CyclicCountView.vue'),
+    meta: { 
+      requiresAuth: true,
+      requiresRole: ['admin', 'operator']
+    }
   }
 ]
 
@@ -44,7 +54,6 @@ const router = createRouter({
   routes
 })
 
-// ✅ FUNCIÓN CORREGIDA: Espera el estado de autenticación UNA SOLA VEZ
 function getCurrentUser() {
   return new Promise((resolve, reject) => {
     // Si ya hay usuario autenticado, resolverlo inmediatamente
@@ -56,7 +65,7 @@ function getCurrentUser() {
     // Si no, esperar el evento de auth
     const unsubscribe = auth.onAuthStateChanged(
       (user) => {
-        unsubscribe() // ✅ Cancelar suscripción inmediatamente
+        unsubscribe()
         resolve(user)
       },
       (error) => {
@@ -67,7 +76,6 @@ function getCurrentUser() {
   })
 }
 
-// ✅ GUARD SIMPLIFICADO Y SIN BUCLES
 router.beforeEach(async (to, from, next) => {
   // Evitar bucles infinitos: Si ya estamos en la ruta destino, permitir
   if (to.path === from.path) {
@@ -78,9 +86,6 @@ router.beforeEach(async (to, from, next) => {
     // Obtener usuario actual UNA SOLA VEZ
     const user = await getCurrentUser()
 
-    // ============================================
-    // RUTAS PÚBLICAS (requiresGuest)
-    // ============================================
     if (to.meta.requiresGuest) {
       if (user) {
         
@@ -101,9 +106,6 @@ router.beforeEach(async (to, from, next) => {
       }
     }
 
-    // ============================================
-    // RUTAS PROTEGIDAS (requiresAuth)
-    // ============================================
     if (to.meta.requiresAuth) {
       if (!user) {
         return next('/login')
