@@ -7,7 +7,6 @@ import {
   doc, 
   getDocs, 
   query, 
-  where, 
   orderBy,
   onSnapshot
 } from 'firebase/firestore'
@@ -15,7 +14,7 @@ import { db } from '../firebase/firebase.js'
 import { useAuth } from './useAuth.js'
 
 export function useProducts() {
-  const { user } = useAuth()
+  const { user, userProfile } = useAuth()
   const products = ref([])
   const loading = ref(false)
   const error = ref(null)
@@ -41,11 +40,14 @@ export function useProducts() {
     'Descontinuado'
   ]
 
-  // Referencia a la colección de productos del usuario
+  // Referencia a la colección de productos
   const getProductsCollection = () => {
     if (!user.value?.uid) {
       throw new Error('Usuario no autenticado')
     }
+    
+    // Por ahora, cada usuario gestiona sus propios productos
+    // La compartición por projectCode se implementará más adelante
     return collection(db, `users/${user.value.uid}/products`)
   }
 

@@ -1,8 +1,16 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Reglas básicas para usuarios autenticados
-    match /users/{userId}/{document=**} {
+    
+    // Colección de usuarios
+    match /users/{userId} {
+      // El usuario puede leer y escribir su propio documento
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Colección de productos
+    match /users/{userId}/products/{productId} {
+      // El usuario solo puede acceder a sus propios productos
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
   }
