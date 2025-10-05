@@ -2,16 +2,20 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Colección de usuarios
+    // Colección de usuarios - Acceso permisivo para desarrollo
     match /users/{userId} {
-      // El usuario puede leer y escribir su propio documento
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      // Cualquier usuario autenticado puede leer perfiles
+      // (necesario para que operarios verifiquen códigos de proyecto)
+      allow read: if request.auth != null;
+      
+      // Solo el dueño puede modificar su perfil
+      allow write: if request.auth != null && request.auth.uid == userId;
     }
     
-    // Colección de productos
+    // Colección de productos - Acceso permisivo para desarrollo
     match /users/{userId}/products/{productId} {
-      // El usuario solo puede acceder a sus propios productos
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      // Permitir lectura y escritura a cualquier usuario autenticado
+      allow read, write: if request.auth != null;
     }
   }
 }

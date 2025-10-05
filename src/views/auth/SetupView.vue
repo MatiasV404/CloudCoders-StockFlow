@@ -154,7 +154,8 @@
             <div class="flex items-center justify-between">
               <div class="flex-1">
                 <p class="text-xs text-gray-600 mb-1">Comparte este código con tus operarios</p>
-                <p class="text-3xl font-bold text-blue-600 tracking-wider">{{ generatedCode }}</p>
+                <!-- Mostrar código generado dinámicamente -->
+                <p class="text-3xl font-bold text-blue-600 tracking-wider font-mono">{{ generatedCode }}</p>
               </div>
               <button
                 @click="copyCode"
@@ -187,9 +188,9 @@
             <input
               v-model="projectCodeInput"
               type="text"
-              placeholder="Ingresa el código (ej: ABC12345)"
+              placeholder="Ingresa el código (ej: A1B2C3D4)"
               maxlength="8"
-              class="w-full px-4 py-3 border-2 border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent uppercase text-center text-xl font-bold tracking-wider"
+              class="w-full px-4 py-3 border-2 border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent uppercase text-center text-xl font-bold tracking-wider font-mono"
               :class="{ 'border-red-500': codeError }"
             />
             <p v-if="codeError" class="mt-2 text-sm text-red-600 flex items-center gap-1">
@@ -225,7 +226,7 @@
           >
             <svg v-if="loading" class="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12,1A11,11 0 1 0 23,12A11,11 0 0 0 12,1Zm0,19a8,8 0 1 1 8-8A8,8 0 0 1 12,20Z" opacity=".25"/>
-              <path d="M10.14,1.16a11,11 0 0 0-9,8.92A1.59,1.59 0 0 0 2.46,12,1.52,1.52 0 0 0 4.11,10.7a8,8 0 0 1 6.66-6.61A1.42,1.42 0 0 0 12,2.69h0A1.57,1.57 0 0 0 10.14,1.16Z"/>
+              <path d="M10.14,1.16a11,11 0 0 0-9,8.92A1.59,1.59 0 0 0 2.46,12,1.52,1.52 0 0,0 4.11,10.7a8,8 0 0 1 6.66-6.61A1.42,1.42 0 0 0 12,2.69h0A1.57,1.57 0 0 0 10.14,1.16Z"/>
             </svg>
             {{ loading ? 'Configurando...' : 'Finalizar Configuración' }}
           </button>
@@ -237,7 +238,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useAuth } from '../../composables/useAuth.js'
 import { useRouter } from 'vue-router'
 
@@ -251,6 +252,9 @@ const codeError = ref('')
 const error = ref('')
 const loading = ref(false)
 
+// Generar código cuando se selecciona rol de admin
+const generatedCode = ref('')
+
 // Computed properties para mostrar info del usuario
 const userEmail = computed(() => {
   return user.value?.email || 'usuario@email.com'
@@ -261,14 +265,22 @@ const userInitial = computed(() => {
   return email.charAt(0).toUpperCase()
 })
 
-const generatedCode = computed(() => {
-  return user.value?.uid.substring(0, 8).toUpperCase() || ''
-})
+// Generar código único
+const generateUniqueCode = () => {
+  const timestamp = Date.now().toString(36)
+  const random = Math.random().toString(36).substring(2, 6)
+  return (timestamp.substring(timestamp.length - 4) + random).toUpperCase()
+}
 
 const selectRole = (role) => {
   selectedRole.value = role
   codeError.value = ''
   error.value = ''
+
+  // Generar código cuando selecciona admin
+  if (role === 'admin' || role === 'admin_operator') {
+    generatedCode.value = generateUniqueCode()
+  }
 }
 
 const nextStep = () => {
@@ -280,7 +292,6 @@ const nextStep = () => {
 const copyCode = async () => {
   try {
     await navigator.clipboard.writeText(generatedCode.value)
-    // Feedback visual con alert nativo
     alert('✓ Código copiado al portapapeles')
   } catch (err) {
     console.error('Error copiando código:', err)
@@ -306,7 +317,6 @@ const confirmSetup = async () => {
   codeError.value = ''
 
   try {
-    // Si es operario, verificar código primero
     if (selectedRole.value === 'operator') {
       if (!projectCodeInput.value || projectCodeInput.value.length < 8) {
         codeError.value = 'Ingresa un código válido de 8 caracteres'
@@ -322,14 +332,20 @@ const confirmSetup = async () => {
         return
       }
 
-      // Crear perfil con código del admin
+      // NUEVO: Log para debugging
+      console.log('✅ Código verificado:', {
+        projectCode: projectCodeInput.value,
+        adminEmail: verification.adminEmail
+      })
+
       await createUserProfile(selectedRole.value, projectCodeInput.value.toUpperCase())
     } else {
-      // Admin o Admin/Operator
-      await createUserProfile(selectedRole.value)
+      await createUserProfile(selectedRole.value, generatedCode.value)
+      
+      // NUEVO: Log para debugging
+      console.log('✅ Admin creado con código:', generatedCode.value)
     }
 
-    // Redirigir según rol
     if (selectedRole.value === 'operator') {
       await router.push('/inventory')
     } else {
@@ -337,8 +353,8 @@ const confirmSetup = async () => {
     }
 
   } catch (err) {
-    console.error('Error en setup:', err)
-    error.value = 'Error al configurar tu cuenta. Inténtalo nuevamente.'
+    console.error('❌ Error en setup:', err)
+    error.value = 'Error al configurar tu cuenta: ' + err.message
   } finally {
     loading.value = false
   }

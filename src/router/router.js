@@ -35,7 +35,7 @@ const routes = [
     component: () => import('../views/inventory/InventoryView.vue'),
     meta: { 
       requiresAuth: true,
-      requiresRole: ['admin_operator', 'operator']
+      requiresRole: ['admin_operator', 'operator', 'admin']
     }
   }
 ]
@@ -45,80 +45,98 @@ const router = createRouter({
   routes
 })
 
-// Guard mejorado con validación de roles
+// MEJORADO: Guard con mejor manejo de estados
 router.beforeEach((to, from, next) => {
+  console.log(`🧭 Navegando de ${from.path} a ${to.path}`)
+  
   const unsubscribe = onAuthStateChanged(auth, async (user) => {
     unsubscribe()
     
-    // Rutas públicas - MEJORADO
+    console.log('🔐 Usuario actual:', user?.email || 'No autenticado')
+    
+    // Rutas públicas (requiresGuest)
     if (to.meta.requiresGuest) {
       if (user) {
+        console.log('👉 Usuario autenticado intentando acceder a ruta pública')
         try {
           const userDoc = await getDoc(doc(db, 'users', user.uid))
           
           if (!userDoc.exists()) {
+            console.log('👉 Usuario sin perfil → /setup')
             next('/setup')
             return
           }
 
-          // Redirigir según rol
           const userRole = userDoc.data().role
+          console.log('👉 Usuario con perfil, rol:', userRole)
+          
           if (userRole === 'operator') {
             next('/inventory')
           } else {
             next('/dashboard')
           }
         } catch (err) {
-          console.error('Error verificando usuario:', err)
+          console.error('❌ Error verificando usuario:', err)
           next('/dashboard')
         }
       } else {
+        console.log('✅ Permitir acceso a ruta pública')
         next()
       }
       return
     }
 
-    // Rutas protegidas
-    if (to.meta.requiresAuth && !user) {
-      next('/login')
-      return
-    }
+    // Rutas protegidas (requiresAuth)
+    if (to.meta.requiresAuth) {
+      if (!user) {
+        console.log('👉 Ruta protegida sin autenticación → /login')
+        next('/login')
+        return
+      }
 
-    // Si hay usuario, verificar perfil y rol
-    if (user && to.path !== '/setup') {
+      // Verificar perfil y rol
       try {
         const userDoc = await getDoc(doc(db, 'users', user.uid))
         
-        // Si no tiene perfil, redirigir a setup
+        // Sin perfil → setup
         if (!userDoc.exists()) {
           if (to.path !== '/setup') {
+            console.log('👉 Usuario sin perfil → /setup')
             next('/setup')
           } else {
+            console.log('✅ Permitir acceso a /setup')
             next()
           }
           return
         }
 
-        // Verificar rol requerido
+        // Con perfil → verificar rol si es necesario
         const userRole = userDoc.data().role
         const requiredRoles = to.meta.requiresRole
 
         if (requiredRoles && !requiredRoles.includes(userRole)) {
+          console.log(`❌ Rol ${userRole} no tiene acceso a ${to.path}`)
+          
           // Redirigir según rol
           if (userRole === 'operator') {
+            console.log('👉 Operario → /inventory')
             next('/inventory')
           } else {
+            console.log('👉 Admin → /dashboard')
             next('/dashboard')
           }
           return
         }
 
+        console.log('✅ Acceso permitido a', to.path)
         next()
       } catch (err) {
-        console.error('Error verificando usuario:', err)
+        console.error('❌ Error verificando permisos:', err)
         next('/login')
       }
     } else {
+      // Ruta sin restricciones
+      console.log('✅ Ruta sin restricciones')
       next()
     }
   })
