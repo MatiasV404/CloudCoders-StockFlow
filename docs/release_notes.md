@@ -1,5 +1,12 @@
 # 📋 Notas de Versión - StockFlow
 
+## v1.2.1 - Alertas migradas a modales personalizados
+
+**Posted on 06-10-2025**
+
+**UPDATED: Alertas y confirmacione personalizadas**
+- [REFACTORING] Cerrar sesión: Las acciones de cierre de sesión se migraron a modales reutilizables.
+
 ## v1.2.0 - Códigos QR y Trazabilidad de Productos
 
 **Posted on 05-10-2025**

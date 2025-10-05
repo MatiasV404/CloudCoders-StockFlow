@@ -65,33 +65,16 @@
       @cancel="showLogoutModal = false"
     />
 
-    <!-- Toast de Error -->
-    <Transition
-      enter-active-class="transition ease-out duration-300"
-      enter-from-class="translate-y-2 opacity-0"
-      enter-to-class="translate-y-0 opacity-100"
-      leave-active-class="transition ease-in duration-200"
-      leave-from-class="translate-y-0 opacity-100"
-      leave-to-class="translate-y-2 opacity-0"
-    >
-      <div
-        v-if="showErrorToast"
-        class="fixed bottom-4 right-4 bg-red-500 text-white px-6 py-4 rounded-lg shadow-2xl flex items-center gap-3 max-w-md z-50"
-      >
-        <svg class="w-6 h-6 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M13,14H11V10H13M13,18H11V16H13M1,21H23L12,2L1,21Z" />
-        </svg>
-        <div class="flex-1">
-          <p class="font-semibold">Error al cerrar sesión</p>
-          <p class="text-sm opacity-90">La página se recargará automáticamente</p>
-        </div>
-        <button @click="showErrorToast = false" class="hover:bg-red-600 p-1 rounded">
-          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" />
-          </svg>
-        </button>
-      </div>
-    </Transition>
+    <!-- ✅ Toast de Error (usando componente) -->
+    <Toast
+      :show="showErrorToast"
+      type="error"
+      title="Error al cerrar sesión"
+      message="La página se recargará automáticamente"
+      :duration="3000"
+      position="bottom-right"
+      @close="showErrorToast = false"
+    />
   </div>
 </template>
 
@@ -101,6 +84,7 @@ import { useRoute } from 'vue-router'
 import { useAuth } from '../../composables/useAuth.js'
 import Sidebar from './Sidebar.vue'
 import ConfirmModal from '../common/ConfirmModal.vue'
+import Toast from '../common/Toast.vue'
 
 const { logout } = useAuth()
 const route = useRoute()
@@ -120,7 +104,6 @@ const confirmLogout = async () => {
   } catch (err) {
     console.error('❌ Error en logout desde layout:', err)
     
-    // Mostrar toast en vez de alert
     showErrorToast.value = true
     
     // Recargar después de 3 segundos
