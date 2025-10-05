@@ -52,25 +52,14 @@ export function useAuth() {
     }
   }
 
+  // ✅ CORREGIDO: Solo actualizar estado, NO navegar desde aquí
   onAuthStateChanged(auth, async (firebaseUser) => {
-    
     user.value = firebaseUser
     
     if (firebaseUser) {
-      const hasProfile = await loadUserProfile(firebaseUser.uid)
-      
-      if (!hasProfile) {
-        if (router.currentRoute.value.path !== '/setup' && router.currentRoute.value.path !== '/login') {
-          await router.push('/setup')
-        }
-      }
+      await loadUserProfile(firebaseUser.uid)
     } else {
       userProfile.value = null
-      
-      const publicRoutes = ['/login', '/']
-      if (!publicRoutes.includes(router.currentRoute.value.path)) {
-        await router.push('/login')
-      }
     }
     
     loading.value = false
@@ -83,11 +72,9 @@ export function useAuth() {
       loading.value = true
       
       const result = await signInWithEmailAndPassword(auth, email, password)
-      
       const hasProfile = await loadUserProfile(result.user.uid)
       
       if (hasProfile) {
-        // Redirigir según rol
         if (userProfile.value.role === 'operator') {
           await router.push('/inventory')
         } else {
@@ -113,7 +100,6 @@ export function useAuth() {
       loading.value = true
       
       const result = await createUserWithEmailAndPassword(auth, email, password)
-      
       await router.push('/setup')
       return result
     } catch (err) {
@@ -131,7 +117,6 @@ export function useAuth() {
       loading.value = true
       
       const result = await signInWithPopup(auth, googleProvider)
-      
       const hasProfile = await loadUserProfile(result.user.uid)
       
       if (hasProfile) {
@@ -160,7 +145,6 @@ export function useAuth() {
     }
 
     try {
-      
       const newProfile = {
         uid: user.value.uid,
         email: user.value.email,
@@ -183,7 +167,6 @@ export function useAuth() {
   }
 
   const verifyProjectCode = async (code) => {
-    
     try {
       const usersRef = collection(db, 'users')
       const q = query(usersRef, where('projectCode', '==', code.toUpperCase()))
@@ -197,7 +180,6 @@ export function useAuth() {
       const adminDoc = querySnapshot.docs[0]
       const adminData = adminDoc.data()
 
-      // Solo verificar que sea admin
       if (adminData.role !== 'admin') {
         return { valid: false, message: 'Código inválido' }
       }
@@ -215,13 +197,11 @@ export function useAuth() {
 
   const logout = async () => {
     try {
-      
       user.value = null
       userProfile.value = null
       error.value = null
       
       await signOut(auth)
-      
       await router.push('/login')
       window.location.reload()
     } catch (err) {

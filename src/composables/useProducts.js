@@ -39,34 +39,34 @@ export function useProducts() {
 
   const findAdminUserId = async () => {
     if (!user.value?.uid || !userProfile.value?.projectCode) {
-      return null
+      return null;
     }
 
     try {
       // Si el usuario actual es admin, usar su UID
-      if (userProfile.value.role === 'admin') {
-        return user.value.uid
+      if (userProfile.value.role === "admin") {
+        return user.value.uid;
       }
 
       // Si es operario, buscar el admin por projectCode
-      const usersRef = collection(db, 'users')
+      const usersRef = collection(db, "users");
       const q = query(
-        usersRef, 
-        where('projectCode', '==', userProfile.value.projectCode),
-        where('role', '==', 'admin') // ✅ SIMPLIFICADO: Solo buscar 'admin'
-      )
-      const querySnapshot = await getDocs(q)
+        usersRef,
+        where("projectCode", "==", userProfile.value.projectCode),
+        where("role", "==", "admin") // ✅ SIMPLIFICADO: Solo buscar 'admin'
+      );
+      const querySnapshot = await getDocs(q);
 
       if (!querySnapshot.empty) {
-        return querySnapshot.docs[0].id
+        return querySnapshot.docs[0].id;
       }
 
-      return null
+      return null;
     } catch (err) {
-      console.error('Error buscando admin:', err)
-      return null
+      console.error("Error buscando admin:", err);
+      return null;
     }
-  }
+  };
 
   // Referencia a la colección de productos
   const getProductsCollection = async () => {
@@ -115,13 +115,16 @@ export function useProducts() {
 
   // Escuchar cambios en tiempo real
   const subscribeToProducts = async () => {
-    if (!user.value?.uid) return null;
+    if (!user.value?.uid) {
+      console.warn("⚠️ No se puede suscribir: usuario no autenticado");
+      return null;
+    }
 
     try {
       const productsRef = await getProductsCollection();
       const q = query(productsRef, orderBy("createdAt", "desc"));
 
-      return onSnapshot(
+      const unsubscribeFn = onSnapshot(
         q,
         (querySnapshot) => {
           products.value = querySnapshot.docs.map((doc) => ({
@@ -130,12 +133,14 @@ export function useProducts() {
           }));
         },
         (err) => {
-          console.error("Error en suscripción:", err);
+          console.error("❌ Error en suscripción:", err);
           error.value = "Error al sincronizar productos: " + err.message;
         }
       );
+      return unsubscribeFn;
     } catch (err) {
-      console.error("Error suscribiéndose a productos:", err);
+      console.error("❌ Error suscribiéndose a productos:", err);
+      error.value = "Error al suscribirse: " + err.message;
       return null;
     }
   };

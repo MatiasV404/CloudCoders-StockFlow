@@ -7,99 +7,81 @@
         <p class="m-0 opacity-90 text-base sm:text-lg">Gestiona tu inventario de manera eficiente</p>
       </div>
 
-      <!-- Grid de estadísticas con datos reales -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8" data-aos="fade-up"
-        data-aos-delay="100">
-        <div
-          class="bg-white p-4 sm:p-6 rounded-xl shadow-sm flex items-center gap-3 sm:gap-5 border-l-4 border-blue-500 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md">
+      <!-- Grid de estadísticas -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8" data-aos="fade-up" data-aos-delay="100">
+        <div class="bg-white p-4 sm:p-6 rounded-xl shadow-sm flex items-center gap-3 sm:gap-5 border-l-4 border-blue-500">
           <div class="text-3xl sm:text-4xl w-12 sm:w-16 flex-shrink-0 text-center">📦</div>
           <div class="min-w-0 flex-1">
-            <h3 class="m-0 mb-1 sm:mb-2 text-gray-500 text-xs sm:text-sm font-medium uppercase tracking-wider">Total
-              Productos</h3>
-            <p class="m-0 text-2xl sm:text-3xl font-bold text-gray-800 truncate">{{ stats.totalProducts }}</p>
+            <h3 class="m-0 mb-1 sm:mb-2 text-gray-500 text-xs sm:text-sm font-medium uppercase">Total Productos</h3>
+            <p class="m-0 text-2xl sm:text-3xl font-bold text-gray-800">{{ stats.totalProducts }}</p>
           </div>
         </div>
 
-        <div
-          class="bg-white p-4 sm:p-6 rounded-xl shadow-sm flex items-center gap-3 sm:gap-5 border-l-4 border-yellow-500 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md">
+        <div class="bg-white p-4 sm:p-6 rounded-xl shadow-sm flex items-center gap-3 sm:gap-5 border-l-4 border-yellow-500">
           <div class="text-3xl sm:text-4xl w-12 sm:w-16 flex-shrink-0 text-center">⚠️</div>
           <div class="min-w-0 flex-1">
-            <h3 class="m-0 mb-1 sm:mb-2 text-gray-500 text-xs sm:text-sm font-medium uppercase tracking-wider">Stock
-              Bajo</h3>
-            <p class="m-0 text-2xl sm:text-3xl font-bold text-gray-800 truncate">{{ stats.lowStock }}</p>
+            <h3 class="m-0 mb-1 sm:mb-2 text-gray-500 text-xs sm:text-sm font-medium uppercase">Stock Bajo</h3>
+            <p class="m-0 text-2xl sm:text-3xl font-bold text-gray-800">{{ stats.lowStock }}</p>
           </div>
         </div>
 
-        <div
-          class="bg-white p-4 sm:p-6 rounded-xl shadow-sm flex items-center gap-3 sm:gap-5 border-l-4 border-green-500 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md">
+        <div class="bg-white p-4 sm:p-6 rounded-xl shadow-sm flex items-center gap-3 sm:gap-5 border-l-4 border-green-500">
           <div class="text-3xl sm:text-4xl w-12 sm:w-16 flex-shrink-0 text-center">💰</div>
           <div class="min-w-0 flex-1">
-            <h3 class="m-0 mb-1 sm:mb-2 text-gray-500 text-xs sm:text-sm font-medium uppercase tracking-wider">Valor
-              Total</h3>
-            <p class="m-0 text-2xl sm:text-3xl font-bold text-gray-800 truncate">${{ formatCurrency(stats.totalValue) }}
-            </p>
+            <h3 class="m-0 mb-1 sm:mb-2 text-gray-500 text-xs sm:text-sm font-medium uppercase">Valor Total</h3>
+            <p class="m-0 text-2xl sm:text-3xl font-bold text-gray-800">${{ formatCurrency(stats.totalValue) }}</p>
           </div>
         </div>
 
-        <div
-          class="bg-white p-4 sm:p-6 rounded-xl shadow-sm flex items-center gap-3 sm:gap-5 border-l-4 border-red-500 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md">
+        <div class="bg-white p-4 sm:p-6 rounded-xl shadow-sm flex items-center gap-3 sm:gap-5 border-l-4 border-red-500">
           <div class="text-3xl sm:text-4xl w-12 sm:w-16 flex-shrink-0 text-center">🚫</div>
           <div class="min-w-0 flex-1">
-            <h3 class="m-0 mb-1 sm:mb-2 text-gray-500 text-xs sm:text-sm font-medium uppercase tracking-wider">Sin Stock
-            </h3>
-            <p class="m-0 text-2xl sm:text-3xl font-bold text-gray-800 truncate">{{ stats.outOfStock }}</p>
+            <h3 class="m-0 mb-1 sm:mb-2 text-gray-500 text-xs sm:text-sm font-medium uppercase">Sin Stock</h3>
+            <p class="m-0 text-2xl sm:text-3xl font-bold text-gray-800">{{ stats.outOfStock }}</p>
           </div>
         </div>
       </div>
 
-      <!-- Acciones rápidas con funcionalidad -->
+      <!-- Acciones rápidas -->
       <div data-aos="fade-up" data-aos-delay="200">
         <h3 class="m-0 mb-4 sm:mb-5 text-gray-800 text-xl sm:text-2xl font-semibold">Acciones Rápidas</h3>
-        <!-- Reemplaza los botones de acciones rápidas con estos: -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-          <!-- Agregar Producto - Funcional -->
           <button @click="goToAddProduct"
-            class="bg-white border-2 border-gray-200 p-4 sm:p-5 rounded-xl cursor-pointer transition-all flex items-center gap-3 font-medium text-gray-600 hover:border-blue-500 hover:text-blue-500 hover:-translate-y-0.5 hover:shadow-sm text-left">
+            class="bg-white border-2 border-gray-200 p-4 sm:p-5 rounded-xl cursor-pointer transition-all flex items-center gap-3 font-medium text-gray-600 hover:border-blue-500 hover:text-blue-500 text-left">
             <span class="text-xl sm:text-2xl flex-shrink-0">➕</span>
             <div>
-              <span class="block truncate">Agregar Producto</span>
+              <span class="block">Agregar Producto</span>
               <span class="text-xs text-gray-400">Crear nuevo producto</span>
             </div>
           </button>
 
-          <!-- Ver Inventario - Funcional -->
           <button @click="goToInventory"
-            class="bg-white border-2 border-gray-200 p-4 sm:p-5 rounded-xl cursor-pointer transition-all flex items-center gap-3 font-medium text-gray-600 hover:border-blue-500 hover:text-blue-500 hover:-translate-y-0.5 hover:shadow-sm text-left">
+            class="bg-white border-2 border-gray-200 p-4 sm:p-5 rounded-xl cursor-pointer transition-all flex items-center gap-3 font-medium text-gray-600 hover:border-blue-500 hover:text-blue-500 text-left">
             <span class="text-xl sm:text-2xl flex-shrink-0">📋</span>
             <div>
-              <span class="block truncate">Ver Inventario</span>
+              <span class="block">Ver Inventario</span>
               <span class="text-xs text-gray-400">Gestionar productos</span>
             </div>
           </button>
 
-          <!-- Generar Reporte - Deshabilitado -->
-          <div
-            class="bg-gray-50 border-2 border-gray-200 p-4 sm:p-5 rounded-xl cursor-not-allowed transition-all flex items-center gap-3 font-medium text-gray-400 text-left relative sm:col-span-2 lg:col-span-1 opacity-60">
+          <div class="bg-gray-50 border-2 border-gray-200 p-4 sm:p-5 rounded-xl cursor-not-allowed flex items-center gap-3 font-medium text-gray-400 text-left relative opacity-60">
             <span class="text-xl sm:text-2xl flex-shrink-0">📈</span>
             <div>
-              <span class="block truncate">Generar Reporte</span>
+              <span class="block">Generar Reporte</span>
               <span class="text-xs text-gray-300">Próximamente</span>
             </div>
-            <!-- Badge "Próximamente" -->
-            <div
-              class="absolute -top-2 -right-2 bg-yellow-100 border border-yellow-300 text-yellow-700 text-xs px-2 py-1 rounded-full font-semibold">
+            <div class="absolute -top-2 -right-2 bg-yellow-100 border border-yellow-300 text-yellow-700 text-xs px-2 py-1 rounded-full font-semibold">
               Pronto
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Productos recientes si hay datos -->
+      <!-- Productos recientes -->
       <div v-if="recentProducts.length > 0" class="mt-8" data-aos="fade-up" data-aos-delay="300">
         <div class="flex items-center justify-between mb-4">
           <h3 class="text-xl sm:text-2xl font-semibold text-gray-800">Productos Recientes</h3>
-          <router-link to="/inventory"
-            class="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center gap-1 no-underline">
+          <router-link to="/inventory" class="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center gap-1 no-underline">
             Ver todos
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
               <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" />
@@ -125,8 +107,7 @@
                     <div class="text-sm text-gray-500">{{ product.code || product.sku }}</div>
                   </td>
                   <td class="px-4 py-3">
-                    <span
-                      class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                       {{ product.category }}
                     </span>
                   </td>
@@ -141,8 +122,7 @@
                     </div>
                   </td>
                   <td class="px-4 py-3">
-                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
-                      :class="getStatusClass(product.status)">
+                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium" :class="getStatusClass(product.status)">
                       {{ product.status }}
                     </span>
                   </td>
@@ -159,13 +139,13 @@
           <div class="text-6xl mb-4">📦</div>
           <h3 class="text-xl font-semibold text-gray-800 mb-2">¡Comienza tu inventario!</h3>
           <p class="text-gray-600 mb-6">Agrega tu primer producto para empezar a gestionar tu stock</p>
-          <router-link to="/inventory" @click="openAddProductModal"
-            class="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium no-underline">
+          <button @click="goToAddProduct"
+            class="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium border-0 cursor-pointer">
             <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
               <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" />
             </svg>
             Agregar Primer Producto
-          </router-link>
+          </button>
         </div>
       </div>
     </div>
@@ -187,29 +167,43 @@ const {
   subscribeToProducts
 } = useProducts()
 
-// Suscripción en tiempo real
 let unsubscribe = null
 
 onMounted(async () => {
-  await loadProducts()
-  unsubscribe = subscribeToProducts()
+  try {
+    await loadProducts()
+    
+    // Intentar suscribirse
+    const subscription = await subscribeToProducts()
+    if (subscription && typeof subscription === 'function') {
+      unsubscribe = subscription
+    } else {
+      console.warn('⚠️ No se pudo establecer suscripción en tiempo real')
+    }
+  } catch (error) {
+    console.error('❌ Error cargando productos en dashboard:', error)
+  }
 })
 
 onUnmounted(() => {
-  if (unsubscribe) unsubscribe()
+  if (unsubscribe && typeof unsubscribe === 'function') {
+    try {
+      unsubscribe()
+    } catch (error) {
+      console.error('❌ Error limpiando suscripción:', error)
+    }
+  }
+  unsubscribe = null
 })
 
-// Productos recientes (últimos 5)
 const recentProducts = computed(() => {
   return products.value.slice(0, 5)
 })
 
-// Función para formatear moneda
 const formatCurrency = (amount) => {
   return new Intl.NumberFormat('es-CL').format(amount)
 }
 
-// Función para clases de estado
 const getStatusClass = (status) => {
   const classes = {
     'Activo': 'bg-green-100 text-green-800',
@@ -221,34 +215,14 @@ const getStatusClass = (status) => {
   return classes[status] || 'bg-gray-100 text-gray-800'
 }
 
-// Función para abrir modal de agregar producto
-const openAddProductModal = () => {
-  // Navegar a inventario y después trigger del modal
+const goToAddProduct = () => {
   router.push({
     path: '/inventory',
     query: { action: 'add' }
   })
 }
 
-// Función para navegar a inventario con acción específica
-const navigateToInventory = (action = null) => {
-  if (action) {
-    router.push({
-      path: '/inventory',
-      query: { action }
-    })
-  } else {
-    router.push('/inventory')
-  }
-}
-
-// Función específica para agregar producto
-const goToAddProduct = () => {
-  navigateToInventory('add')
-}
-
-// Función específica para ver inventario
 const goToInventory = () => {
-  navigateToInventory()
+  router.push('/inventory')
 }
 </script>

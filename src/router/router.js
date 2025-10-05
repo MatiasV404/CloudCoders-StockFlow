@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { auth, db } from '../firebase/firebase.js'
-import { onAuthStateChanged } from 'firebase/auth'
 import { doc, getDoc } from 'firebase/firestore'
 
 const routes = [
@@ -45,77 +44,102 @@ const router = createRouter({
   routes
 })
 
-router.beforeEach((to, from, next) => {
-  
-  const unsubscribe = onAuthStateChanged(auth, async (user) => {
-    unsubscribe()
-    
-    if (to.meta.requiresGuest) {
-      if (user) {
-        try {
-          const userDoc = await getDoc(doc(db, 'users', user.uid))
-          
-          if (!userDoc.exists()) {
-            next('/setup')
-            return
-          }
-
-          const userRole = userDoc.data().role
-          
-          if (userRole === 'operator') {
-            next('/inventory')
-          } else {
-            next('/dashboard')
-          }
-        } catch (err) {
-          console.error('❌ Error verificando usuario:', err)
-          next('/dashboard')
-        }
-      } else {
-        next()
-      }
+// ✅ FUNCIÓN CORREGIDA: Espera el estado de autenticación UNA SOLA VEZ
+function getCurrentUser() {
+  return new Promise((resolve, reject) => {
+    // Si ya hay usuario autenticado, resolverlo inmediatamente
+    if (auth.currentUser) {
+      resolve(auth.currentUser)
       return
     }
 
-    if (to.meta.requiresAuth) {
-      if (!user) {
-        next('/login')
-        return
+    // Si no, esperar el evento de auth
+    const unsubscribe = auth.onAuthStateChanged(
+      (user) => {
+        unsubscribe() // ✅ Cancelar suscripción inmediatamente
+        resolve(user)
+      },
+      (error) => {
+        unsubscribe()
+        reject(error)
       }
+    )
+  })
+}
 
-      try {
+// ✅ GUARD SIMPLIFICADO Y SIN BUCLES
+router.beforeEach(async (to, from, next) => {
+  // Evitar bucles infinitos: Si ya estamos en la ruta destino, permitir
+  if (to.path === from.path) {
+    return next()
+  }
+
+  try {
+    // Obtener usuario actual UNA SOLA VEZ
+    const user = await getCurrentUser()
+
+    // ============================================
+    // RUTAS PÚBLICAS (requiresGuest)
+    // ============================================
+    if (to.meta.requiresGuest) {
+      if (user) {
+        
+        // Verificar perfil
         const userDoc = await getDoc(doc(db, 'users', user.uid))
         
         if (!userDoc.exists()) {
-          if (to.path !== '/setup') {
-            next('/setup')
-          } else {
-            next()
-          }
-          return
+          return next('/setup')
         }
 
         const userRole = userDoc.data().role
-        const requiredRoles = to.meta.requiresRole
-
-        if (requiredRoles && !requiredRoles.includes(userRole)) {
-          
-          if (userRole === 'operator') {
-            next('/inventory')
-          } else {
-            next('/dashboard')
-          }
-          return
-        }
-        next()
-      } catch (err) {
-        console.error('❌ Error verificando permisos:', err)
-        next('/login')
+        
+        // Redirigir según rol
+        const redirectTo = userRole === 'operator' ? '/inventory' : '/dashboard'
+        return next(redirectTo)
+      } else {
+        return next()
       }
-    } else {
-      next()
     }
-  })
+
+    // ============================================
+    // RUTAS PROTEGIDAS (requiresAuth)
+    // ============================================
+    if (to.meta.requiresAuth) {
+      if (!user) {
+        return next('/login')
+      }
+
+      // Verificar perfil
+      const userDoc = await getDoc(doc(db, 'users', user.uid))
+      
+      if (!userDoc.exists()) {
+        // Sin perfil
+        if (to.path !== '/setup') {
+          return next('/setup')
+        }
+        return next()
+      }
+
+      // Con perfil, verificar roles
+      const userRole = userDoc.data().role
+      const requiredRoles = to.meta.requiresRole
+
+      if (requiredRoles && !requiredRoles.includes(userRole)) {
+        
+        // Redirigir según rol
+        const redirectTo = userRole === 'operator' ? '/inventory' : '/dashboard'
+        return next(redirectTo)
+      }
+
+      return next()
+    }
+    
+    return next()
+
+  } catch (error) {
+    console.error('❌ Error en router guard:', error)
+    return next('/login')
+  }
 })
 
 export default router
