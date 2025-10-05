@@ -301,17 +301,35 @@ const productToDelete = ref(null)
 let unsubscribe = null
 
 onMounted(async () => {
-  await loadProducts()
-  unsubscribe = subscribeToProducts()
+  try {
+    await loadProducts()
+    
+    // Intentar suscribirse
+    const subscription = await subscribeToProducts()
+    if (subscription && typeof subscription === 'function') {
+      unsubscribe = subscription
+    } else {
+      console.warn('⚠️ No se pudo establecer suscripción en tiempo real')
+    }
 
-  // Verificar si viene de dashboard con query param para agregar
-  if (route.query.action === 'add') {
-    showAddModal.value = true
+    // Verificar query params
+    if (route.query.action === 'add') {
+      showAddModal.value = true
+    }
+  } catch (error) {
+    console.error('❌ Error cargando productos en inventory:', error)
   }
 })
 
 onUnmounted(() => {
-  if (unsubscribe) unsubscribe()
+  if (unsubscribe && typeof unsubscribe === 'function') {
+    try {
+      unsubscribe()
+    } catch (error) {
+      console.error('❌ Error limpiando suscripción:', error)
+    }
+  }
+  unsubscribe = null
 })
 
 // Watcher para query params

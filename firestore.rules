@@ -1,9 +1,43 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Reglas básicas para usuarios autenticados
-    match /users/{userId}/{document=**} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+    
+    // Función helper para obtener el projectCode del usuario actual
+    function getUserProjectCode() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.projectCode;
+    }
+    
+    // Función helper para obtener el projectCode del dueño de los productos
+    function getOwnerProjectCode(userId) {
+      return get(/databases/$(database)/documents/users/$(userId)).data.projectCode;
+    }
+    
+    // Colección de usuarios
+    match /users/{userId} {
+      // Cualquier usuario autenticado puede leer perfiles (necesario para verificar códigos)
+      allow read: if request.auth != null;
+      
+      // Solo el dueño puede modificar su perfil
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    match /users/{userId}/products/{productId} {
+      // Permitir lectura si:
+      // 1. Es el dueño de los productos O
+      // 2. Comparte el mismo projectCode
+      allow read: if request.auth != null && (
+        request.auth.uid == userId ||
+        getUserProjectCode() == getOwnerProjectCode(userId)
+      );
+      
+      // Permitir escritura si:
+      // 1. Es el dueño O
+      // 2. Comparte projectCode Y tiene permisos de manageProducts
+      allow write: if request.auth != null && (
+        request.auth.uid == userId ||
+        (getUserProjectCode() == getOwnerProjectCode(userId) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.permissions.manageProducts == true)
+      );
     }
   }
 }

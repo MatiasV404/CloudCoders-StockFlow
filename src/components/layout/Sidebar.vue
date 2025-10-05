@@ -14,7 +14,6 @@
         <span v-show="!isCollapsed" class="text-xl font-semibold whitespace-nowrap transition-opacity duration-300">StockFlow</span>
       </div>
       
-      <!-- Botón toggle - solo visible en desktop o cuando está expandido en móvil -->
       <button 
         v-if="!isMobile || !isCollapsed"
         @click="handleToggle" 
@@ -31,7 +30,8 @@
     <!-- Navegación -->
     <nav class="flex-1 py-5">
       <ul class="list-none p-0 m-0">
-        <li class="mb-1">
+        <!-- Dashboard - Solo para admins -->
+        <li v-if="canViewDashboard" class="mb-1">
           <router-link 
             to="/dashboard" 
             @click="handleLinkClick"
@@ -43,14 +43,14 @@
             </svg>
             <span v-show="!isCollapsed || isMobile" class="font-medium whitespace-nowrap transition-opacity duration-300">Dashboard</span>
             
-            <!-- Tooltip solo para desktop colapsado -->
             <div v-if="!isMobile && isCollapsed" class="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 whitespace-nowrap">
               Dashboard
             </div>
           </router-link>
         </li>
 
-        <li class="mb-1">
+        <!-- Inventario - Para todos -->
+        <li v-if="canManageProducts" class="mb-1">
           <router-link 
             to="/inventory" 
             @click="handleLinkClick"
@@ -72,6 +72,14 @@
 
     <!-- Footer del sidebar -->
     <div class="p-5 border-t border-white/10">
+      <!-- Badge de rol -->
+      <div v-show="!isCollapsed || isMobile" class="mb-3">
+        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium"
+          :class="roleClass">
+          {{ roleLabel }}
+        </span>
+      </div>
+      
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center font-semibold text-lg flex-shrink-0">
           {{ userInitials }}
@@ -89,26 +97,27 @@
 import { ref, computed, inject } from 'vue'
 import { useAuth } from '../../composables/useAuth.js'
 
-const { user } = useAuth()
+const { user, userProfile, permissions } = useAuth()
 
-// Inject estado y funciones desde DashboardLayout
 const isCollapsed = inject('sidebarCollapsed', ref(false))
 const toggleSidebar = inject('toggleSidebar', () => {})
 const isMobile = inject('isMobile', ref(false))
 
-// Función local que usa la función inyectada
 const handleToggle = () => {
   toggleSidebar()
 }
 
-// Función para manejar clics en links (cierra sidebar en móvil)
 const handleLinkClick = () => {
   if (isMobile.value) {
     isCollapsed.value = true
   }
 }
 
-// Computed para info del usuario
+// Permisos
+const canViewDashboard = computed(() => permissions.value.viewDashboard)
+const canManageProducts = computed(() => permissions.value.manageProducts)
+
+// Info del usuario
 const userName = computed(() => {
   if (user.value?.displayName) return user.value.displayName
   if (user.value?.email) return user.value.email.split('@')[0]
@@ -120,6 +129,23 @@ const userEmail = computed(() => user.value?.email || '')
 const userInitials = computed(() => {
   const name = userName.value
   return name.charAt(0).toUpperCase()
+})
+
+// Badge de rol
+const roleLabel = computed(() => {
+  const labels = {
+    'admin': 'Administrador',
+    'operator': 'Operario'
+  }
+  return labels[userProfile.value?.role] || 'Usuario'
+})
+
+const roleClass = computed(() => {
+  const classes = {
+    'admin': 'bg-blue-100 text-blue-800',
+    'operator': 'bg-purple-100 text-purple-800'
+  }
+  return classes[userProfile.value?.role] || 'bg-gray-100 text-gray-800'
 })
 </script>
 
