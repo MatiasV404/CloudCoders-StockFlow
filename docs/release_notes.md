@@ -7,6 +7,9 @@
 **UPDATED: Alertas y confirmacione personalizadas**
 - [REFACTORING] Cerrar sesión: Las acciones de cierre de sesión se migraron a modales reutilizables.
 
+**NEW: Toast component**
+- [FEAT] Nuevo componente reutilizable: Toast.vue.
+
 ## v1.2.0 - Códigos QR y Trazabilidad de Productos
 
 **Posted on 05-10-2025**

@@ -56,12 +56,57 @@
         Imprimir
       </button>
     </div>
+
+    <!-- Toast de Éxito - ID Copiado -->
+    <Toast
+      :show="showCopySuccessToast"
+      type="success"
+      title="¡ID copiado!"
+      message="El ID se copió al portapapeles correctamente"
+      :duration="2000"
+      position="bottom-center"
+      @close="showCopySuccessToast = false"
+    />
+
+    <!-- Toast de Error - Copiar ID -->
+    <Toast
+      :show="showCopyErrorToast"
+      type="error"
+      title="Error al copiar"
+      message="No se pudo copiar el ID al portapapeles"
+      :duration="3000"
+      position="bottom-center"
+      @close="showCopyErrorToast = false"
+    />
+
+    <!-- Toast de Error - Descargar QR -->
+    <Toast
+      :show="showDownloadErrorToast"
+      type="error"
+      title="Error al descargar"
+      message="No se pudo descargar el código QR"
+      :duration="3000"
+      position="bottom-center"
+      @close="showDownloadErrorToast = false"
+    />
+
+    <!-- Toast de Error - Imprimir QR -->
+    <Toast
+      :show="showPrintErrorToast"
+      type="error"
+      title="Error al imprimir"
+      :message="printErrorMessage"
+      :duration="3000"
+      position="bottom-center"
+      @close="showPrintErrorToast = false"
+    />
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import QrcodeVue from 'qrcode.vue'
+import Toast from '../common/Toast.vue'
 
 const props = defineProps({
   productId: {
@@ -78,24 +123,33 @@ const props = defineProps({
   }
 })
 
+// Estados para toasts
+const showCopySuccessToast = ref(false)
+const showCopyErrorToast = ref(false)
+const showDownloadErrorToast = ref(false)
+const showPrintErrorToast = ref(false)
+const printErrorMessage = ref('')
+
 const qrValue = computed(() => props.productId)
 
+// Copiar ID con Toast
 const copyProductId = async () => {
   try {
     await navigator.clipboard.writeText(props.productId)
-    alert('✓ ID copiado al portapapeles')
+    showCopySuccessToast.value = true
   } catch (err) {
     console.error('Error copiando ID:', err)
-    alert('✗ No se pudo copiar el ID')
+    showCopyErrorToast.value = true
   }
 }
 
+// Descargar QR con Toast
 const downloadQR = () => {
   try {
     const canvas = document.querySelector('.qr-code')
     if (!canvas) {
       console.error('No se encontró el canvas del QR')
-      alert('✗ No se pudo descargar el QR')
+      showDownloadErrorToast.value = true
       return
     }
 
@@ -107,22 +161,25 @@ const downloadQR = () => {
     link.click()
   } catch (err) {
     console.error('Error descargando QR:', err)
-    alert('✗ No se pudo descargar el QR')
+    showDownloadErrorToast.value = true
   }
 }
 
+// Imprimir QR con Toast
 const printQR = () => {
   try {
     const canvas = document.querySelector('.qr-code')
     if (!canvas) {
       console.error('No se encontró el canvas del QR')
-      alert('✗ No se pudo generar el QR para imprimir')
+      printErrorMessage.value = 'No se pudo generar el código QR para imprimir'
+      showPrintErrorToast.value = true
       return
     }
 
     const printWindow = window.open('', '_blank', 'width=600,height=800')
     if (!printWindow) {
-      alert('✗ Por favor permite ventanas emergentes para imprimir')
+      printErrorMessage.value = 'Por favor permite ventanas emergentes para imprimir'
+      showPrintErrorToast.value = true
       return
     }
 
@@ -173,7 +230,8 @@ const printQR = () => {
     printWindow.document.close()
   } catch (err) {
     console.error('Error imprimiendo QR:', err)
-    alert('✗ No se pudo imprimir el QR')
+    printErrorMessage.value = 'No se pudo imprimir el código QR'
+    showPrintErrorToast.value = true
   }
 }
 </script>
