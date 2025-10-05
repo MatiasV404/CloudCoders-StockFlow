@@ -2,9 +2,9 @@
   <DashboardLayout>
     <div class="w-full max-w-7xl mx-auto px-4 sm:px-6">
       
-      <!-- Header -->
+      <!-- Header Simple -->
       <div class="mb-8">
-        <div class="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-6 rounded-xl mb-6">
+        <div class="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-6 rounded-xl">
           <div class="flex items-center gap-3 mb-2">
             <svg class="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
               <path d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" />
@@ -12,39 +12,6 @@
             <h2 class="text-2xl font-bold m-0">Recuento Cíclico</h2>
           </div>
           <p class="opacity-90 m-0">Escanea códigos QR para registrar el stock físico de productos</p>
-        </div>
-
-        <!-- Estadísticas del recuento -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-purple-500">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-sm text-gray-600 mb-1">Productos Escaneados</p>
-                <p class="text-2xl font-bold text-gray-800">{{ scannedCount }}</p>
-              </div>
-              <div class="text-3xl">📊</div>
-            </div>
-          </div>
-
-          <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-blue-500">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-sm text-gray-600 mb-1">Sesión Actual</p>
-                <p class="text-2xl font-bold text-gray-800">{{ sessionDuration }}</p>
-              </div>
-              <div class="text-3xl">⏱️</div>
-            </div>
-          </div>
-
-          <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-green-500">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-sm text-gray-600 mb-1">Última Actualización</p>
-                <p class="text-sm font-medium text-gray-800">{{ lastUpdate }}</p>
-              </div>
-              <div class="text-3xl">✓</div>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -87,7 +54,7 @@
               <p class="text-sm opacity-75">Haz clic en "Iniciar Escaneo" para comenzar</p>
             </div>
 
-            <!-- Video element (se mostrará cuando implemente el escáner) -->
+            <!-- Video element -->
             <video
               v-show="isScanning"
               ref="videoElement"
@@ -145,7 +112,7 @@
       </div>
 
       <!-- Producto Encontrado -->
-      <div v-if="currentProduct" class="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
+      <div v-if="currentProduct" class="bg-white rounded-xl shadow-sm overflow-hidden">
         <div class="p-6">
           <div class="flex items-start justify-between mb-4">
             <div class="flex items-start gap-4 flex-1">
@@ -243,7 +210,7 @@
               >
                 <svg v-if="updating" class="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12,1A11,11 0 1 0 23,12A11,11 0 0 0 12,1Zm0,19a8,8 0 1 1 8-8A8,8 0 0 1 12,20Z" opacity=".25"/>
-                  <path d="M10.14,1.16a11,11 0 0 0-9,8.92A1.59,1.59 0 0 0 2.46,12,1.52,1.52 0 0 0 4.11,10.7a8,8 0 0 1 6.66-6.61A1.42,1.42 0 0 0 12,2.69h0A1.57,1.57 0 0 0 10.14,1.16Z"/>
+                  <path d="M10.14,1.16a11,11 0 0 0-9,8.92A1.59,1.59 0 0,0 2.46,12,1.52,1.52 0 0,0 4.11,10.7a8,8 0 0 1 6.66-6.61A1.42,1.42 0 0,0 12,2.69h0A1.57,1.57 0 0,0 10.14,1.16Z"/>
                 </svg>
                 {{ updating ? 'Actualizando...' : 'Registrar Recuento' }}
               </button>
@@ -252,41 +219,7 @@
         </div>
       </div>
 
-      <!-- Historial de recuentos de la sesión -->
-      <div v-if="countHistory.length > 0" class="bg-white rounded-xl shadow-sm overflow-hidden">
-        <div class="p-6">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-xl font-semibold text-gray-800 m-0">Historial de Sesión</h3>
-            <button
-              @click="clearHistory"
-              class="text-sm text-gray-600 hover:text-red-600"
-            >
-              Limpiar
-            </button>
-          </div>
-          
-          <div class="space-y-3">
-            <div
-              v-for="(item, index) in countHistory"
-              :key="index"
-              class="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-            >
-              <div class="flex-1">
-                <p class="font-medium text-gray-800">{{ item.productName }}</p>
-                <p class="text-sm text-gray-600">
-                  Stock: {{ item.oldStock }} → {{ item.newStock }}
-                  <span v-if="item.difference !== 0" class="ml-2" :class="item.difference > 0 ? 'text-green-600' : 'text-red-600'">
-                    ({{ item.difference > 0 ? '+' : '' }}{{ item.difference }})
-                  </span>
-                </p>
-              </div>
-              <span class="text-xs text-gray-500">{{ item.time }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Toast de éxito -->
+      <!-- Toasts -->
       <Toast
         :show="showSuccessToast"
         type="success"
@@ -296,7 +229,6 @@
         @close="showSuccessToast = false"
       />
 
-      <!-- Toast de error -->
       <Toast
         :show="showErrorToast"
         type="error"
@@ -329,31 +261,12 @@ const physicalCount = ref(null)
 const countNotes = ref('')
 const updating = ref(false)
 
-// Historial
-const countHistory = ref([])
-const sessionStartTime = ref(null)
-
 // Toasts
 const showSuccessToast = ref(false)
 const showErrorToast = ref(false)
 const errorMessage = ref('')
 
 // Computed
-const scannedCount = computed(() => countHistory.value.length)
-
-const sessionDuration = computed(() => {
-  if (!sessionStartTime.value) return '00:00'
-  const diff = Date.now() - sessionStartTime.value
-  const minutes = Math.floor(diff / 60000)
-  const seconds = Math.floor((diff % 60000) / 1000)
-  return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
-})
-
-const lastUpdate = computed(() => {
-  if (countHistory.value.length === 0) return 'Sin registros'
-  return countHistory.value[0].time
-})
-
 const hasDifference = computed(() => {
   return currentProduct.value && physicalCount.value !== null && physicalCount.value !== currentProduct.value.stock
 })
@@ -366,9 +279,6 @@ const difference = computed(() => {
 // Métodos
 const startScanning = () => {
   isScanning.value = true
-  if (!sessionStartTime.value) {
-    sessionStartTime.value = Date.now()
-  }
   // TODO: Implementar lógica de cámara y escaneo QR
   console.log('📸 Iniciando escáner de cámara...')
 }
@@ -420,17 +330,6 @@ const updatePhysicalCount = async () => {
       stock: physicalCount.value
     })
     
-    // Agregar al historial
-    countHistory.value.unshift({
-      productName: currentProduct.value.name,
-      productId: currentProduct.value.productId,
-      oldStock: currentProduct.value.stock,
-      newStock: physicalCount.value,
-      difference: difference.value,
-      notes: countNotes.value,
-      time: new Date().toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })
-    })
-    
     showSuccessToast.value = true
     clearProduct()
   } catch (error) {
@@ -448,18 +347,12 @@ const clearProduct = () => {
   countNotes.value = ''
 }
 
-const clearHistory = () => {
-  countHistory.value = []
-  sessionStartTime.value = Date.now()
-}
-
 const formatCurrency = (amount) => {
   return new Intl.NumberFormat('es-CL').format(amount)
 }
 
 onMounted(async () => {
   await loadProducts()
-  sessionStartTime.value = Date.now()
 })
 
 onUnmounted(() => {
