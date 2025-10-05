@@ -2,7 +2,7 @@
   <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-600 p-5">
     <div class="bg-white rounded-2xl shadow-2xl p-8 sm:p-10 w-full max-w-2xl relative">
       
-      <!-- Botón de cerrar sesión - Esquina superior derecha -->
+      <!-- Botón de cerrar sesión -->
       <button
         @click="handleLogout"
         class="absolute top-4 right-4 flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors group"
@@ -39,68 +39,40 @@
         </div>
       </div>
 
-      <!-- Step 1: Selección de Rol -->
+      <!-- Step 1: Selección de Rol - SOLO 2 OPCIONES -->
       <div v-if="step === 1" class="space-y-6">
         
-        <!-- Opción 1: Administrador/Operario (Solo) -->
-        <button
-          @click="selectRole('admin_operator')"
-          class="w-full bg-white border-2 p-6 rounded-xl transition-all text-left hover:-translate-y-1 hover:shadow-lg"
-          :class="selectedRole === 'admin_operator' 
-            ? 'border-blue-500 bg-blue-50' 
-            : 'border-gray-200 hover:border-blue-300'"
-        >
-          <div class="flex items-start gap-4">
-            <div class="text-4xl flex-shrink-0">👤</div>
-            <div class="flex-1">
-              <h3 class="text-lg font-semibold text-gray-800 mb-1">
-                Administrador y Operario
-              </h3>
-              <p class="text-sm text-gray-600 mb-3">
-                Para PyMEs que trabajan solas. Acceso completo a dashboard y gestión de productos.
-              </p>
-              <div class="flex flex-wrap gap-2">
-                <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">✓ Dashboard</span>
-                <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">✓ Productos</span>
-                <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">✓ Reportes</span>
-              </div>
-            </div>
-            <div v-if="selectedRole === 'admin_operator'" class="text-blue-500 text-2xl flex-shrink-0">
-              ✓
-            </div>
-          </div>
-        </button>
-
-        <!-- Opción 2: Solo Administrador -->
+        <!-- Opción 1: Administrador - ACCESO COMPLETO -->
         <button
           @click="selectRole('admin')"
           class="w-full bg-white border-2 p-6 rounded-xl transition-all text-left hover:-translate-y-1 hover:shadow-lg"
           :class="selectedRole === 'admin' 
-            ? 'border-green-500 bg-green-50' 
-            : 'border-gray-200 hover:border-green-300'"
+            ? 'border-blue-500 bg-blue-50' 
+            : 'border-gray-200 hover:border-blue-300'"
         >
           <div class="flex items-start gap-4">
             <div class="text-4xl flex-shrink-0">👔</div>
             <div class="flex-1">
               <h3 class="text-lg font-semibold text-gray-800 mb-1">
-                Solo Administrador
+                Administrador
               </h3>
               <p class="text-sm text-gray-600 mb-3">
-                Para empresas con equipo. Podrás registrar operarios que gestionen el inventario.
+                Acceso completo al sistema. Gestiona inventario, visualiza reportes y administra operarios.
               </p>
               <div class="flex flex-wrap gap-2">
-                <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">✓ Dashboard</span>
-                <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">✓ Reportes</span>
-                <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">✓ Gestionar Operarios</span>
+                <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">✓ Dashboard</span>
+                <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">✓ Inventario</span>
+                <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">✓ Reportes</span>
+                <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">✓ Gestionar Operarios</span>
               </div>
             </div>
-            <div v-if="selectedRole === 'admin'" class="text-green-500 text-2xl flex-shrink-0">
+            <div v-if="selectedRole === 'admin'" class="text-blue-500 text-2xl flex-shrink-0">
               ✓
             </div>
           </div>
         </button>
 
-        <!-- Opción 3: Solo Operario -->
+        <!-- Opción 2: Operario - ACCESO LIMITADO -->
         <button
           @click="selectRole('operator')"
           class="w-full bg-white border-2 p-6 rounded-xl transition-all text-left hover:-translate-y-1 hover:shadow-lg"
@@ -112,13 +84,13 @@
             <div class="text-4xl flex-shrink-0">🔧</div>
             <div class="flex-1">
               <h3 class="text-lg font-semibold text-gray-800 mb-1">
-                Solo Operario
+                Operario
               </h3>
               <p class="text-sm text-gray-600 mb-3">
                 Miembro del equipo. Gestiona productos y realiza recuento de inventario.
               </p>
               <div class="flex flex-wrap gap-2">
-                <span class="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">✓ Productos</span>
+                <span class="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">✓ Inventario</span>
                 <span class="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">✓ Recuento</span>
                 <span class="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">✓ Escaneo</span>
               </div>
@@ -143,7 +115,7 @@
       <div v-else-if="step === 2" class="space-y-6">
         
         <!-- Para Administradores: Mostrar código -->
-        <div v-if="selectedRole === 'admin' || selectedRole === 'admin_operator'" class="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl border-2 border-blue-200">
+        <div v-if="selectedRole === 'admin'" class="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl border-2 border-blue-200">
           <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
             <svg class="w-6 h-6 text-blue-600" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1Z" />
@@ -154,7 +126,6 @@
             <div class="flex items-center justify-between">
               <div class="flex-1">
                 <p class="text-xs text-gray-600 mb-1">Comparte este código con tus operarios</p>
-                <!-- Mostrar código generado dinámicamente -->
                 <p class="text-3xl font-bold text-blue-600 tracking-wider font-mono">{{ generatedCode }}</p>
               </div>
               <button
@@ -238,7 +209,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import { useAuth } from '../../composables/useAuth.js'
 import { useRouter } from 'vue-router'
 
@@ -251,11 +222,8 @@ const projectCodeInput = ref('')
 const codeError = ref('')
 const error = ref('')
 const loading = ref(false)
-
-// Generar código cuando se selecciona rol de admin
 const generatedCode = ref('')
 
-// Computed properties para mostrar info del usuario
 const userEmail = computed(() => {
   return user.value?.email || 'usuario@email.com'
 })
@@ -265,7 +233,6 @@ const userInitial = computed(() => {
   return email.charAt(0).toUpperCase()
 })
 
-// Generar código único
 const generateUniqueCode = () => {
   const timestamp = Date.now().toString(36)
   const random = Math.random().toString(36).substring(2, 6)
@@ -277,8 +244,8 @@ const selectRole = (role) => {
   codeError.value = ''
   error.value = ''
 
-  // Generar código cuando selecciona admin
-  if (role === 'admin' || role === 'admin_operator') {
+  // Generar código solo para admin
+  if (role === 'admin') {
     generatedCode.value = generateUniqueCode()
   }
 }
@@ -332,18 +299,9 @@ const confirmSetup = async () => {
         return
       }
 
-      // NUEVO: Log para debugging
-      console.log('✅ Código verificado:', {
-        projectCode: projectCodeInput.value,
-        adminEmail: verification.adminEmail
-      })
-
       await createUserProfile(selectedRole.value, projectCodeInput.value.toUpperCase())
     } else {
       await createUserProfile(selectedRole.value, generatedCode.value)
-      
-      // NUEVO: Log para debugging
-      console.log('✅ Admin creado con código:', generatedCode.value)
     }
 
     if (selectedRole.value === 'operator') {

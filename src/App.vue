@@ -15,15 +15,7 @@ import { watch } from 'vue'
 import { useAuth } from './composables/useAuth.js'
 
 const { authInitialized } = useAuth()
-
-// Log cuando la autenticación esté lista
-watch(authInitialized, (initialized) => {
-  if (initialized) {
-    console.log('✅ Autenticación inicializada')
-  }
-})
 </script>
 
 <style>
-/* Estilos globales se mantienen en style.css */
 </style>

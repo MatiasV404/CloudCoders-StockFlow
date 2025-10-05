@@ -39,37 +39,34 @@ export function useProducts() {
 
   const findAdminUserId = async () => {
     if (!user.value?.uid || !userProfile.value?.projectCode) {
-      return null;
+      return null
     }
 
     try {
       // Si el usuario actual es admin, usar su UID
-      if (
-        userProfile.value.role === "admin" ||
-        userProfile.value.role === "admin_operator"
-      ) {
-        return user.value.uid;
+      if (userProfile.value.role === 'admin') {
+        return user.value.uid
       }
 
       // Si es operario, buscar el admin por projectCode
-      const usersRef = collection(db, "users");
+      const usersRef = collection(db, 'users')
       const q = query(
-        usersRef,
-        where("projectCode", "==", userProfile.value.projectCode),
-        where("role", "in", ["admin", "admin_operator"])
-      );
-      const querySnapshot = await getDocs(q);
+        usersRef, 
+        where('projectCode', '==', userProfile.value.projectCode),
+        where('role', '==', 'admin') // ✅ SIMPLIFICADO: Solo buscar 'admin'
+      )
+      const querySnapshot = await getDocs(q)
 
       if (!querySnapshot.empty) {
-        return querySnapshot.docs[0].id;
+        return querySnapshot.docs[0].id
       }
 
-      return null;
+      return null
     } catch (err) {
-      console.error("Error buscando admin:", err);
-      return null;
+      console.error('Error buscando admin:', err)
+      return null
     }
-  };
+  }
 
   // Referencia a la colección de productos
   const getProductsCollection = async () => {

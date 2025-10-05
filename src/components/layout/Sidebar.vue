@@ -135,7 +135,6 @@ const userInitials = computed(() => {
 const roleLabel = computed(() => {
   const labels = {
     'admin': 'Administrador',
-    'admin_operator': 'Admin/Operario',
     'operator': 'Operario'
   }
   return labels[userProfile.value?.role] || 'Usuario'
@@ -143,8 +142,7 @@ const roleLabel = computed(() => {
 
 const roleClass = computed(() => {
   const classes = {
-    'admin': 'bg-green-100 text-green-800',
-    'admin_operator': 'bg-blue-100 text-blue-800',
+    'admin': 'bg-blue-100 text-blue-800',
     'operator': 'bg-purple-100 text-purple-800'
   }
   return classes[userProfile.value?.role] || 'bg-gray-100 text-gray-800'

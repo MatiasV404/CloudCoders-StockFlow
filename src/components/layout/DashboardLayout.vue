@@ -99,7 +99,6 @@ const handleLogout = async () => {
   if (confirmed) {
     try {
       loggingOut.value = true
-      console.log('🚪 Iniciando cierre de sesión desde layout...')
       await logout()
     } catch (err) {
       console.error('❌ Error en logout desde layout:', err)
