@@ -4,7 +4,7 @@
       
       <!-- Botón de cerrar sesión -->
       <button
-        @click="handleLogout"
+        @click="showLogoutModal = true"
         class="absolute top-4 right-4 flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors group"
         title="Cerrar sesión"
       >
@@ -130,16 +130,28 @@
               </div>
               <button
                 @click="copyCode"
-                class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2"
+                class="transition-colors flex items-center gap-2 px-4 py-2 rounded-lg"
+                :class="codeCopied ? 'bg-green-500 text-white' : 'bg-blue-500 text-white hover:bg-blue-600'"
               >
-                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                <svg v-if="!codeCopied" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" />
                 </svg>
-                <span class="hidden sm:inline">Copiar</span>
+                <svg v-else class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" />
+                </svg>
+                <span class="hidden sm:inline">
+                  {{ codeCopied ? '¡Copiado!' : 'Copiar' }}
+                </span>
               </button>
             </div>
           </div>
-          <p class="text-sm text-gray-600">
+          <div v-if="copyError" class="mt-2 text-sm text-red-600 flex items-center gap-1">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M13,14H11V10H13M13,18H11V16H13M1,21H23L12,2L1,21Z" />
+            </svg>
+            No se pudo copiar el código
+          </div>
+          <p class="text-sm text-gray-600 mt-4">
             <strong>Importante:</strong> Guarda este código. Los operarios lo necesitarán para unirse a tu proyecto.
           </p>
         </div>
@@ -204,6 +216,20 @@
         </div>
       </div>
 
+      <!-- Modal de Logout -->
+      <ConfirmModal
+        :show="showLogoutModal"
+        type="warning"
+        title="¿Cerrar sesión?"
+        message="Perderás el progreso de configuración actual. ¿Estás seguro?"
+        confirmText="Cerrar Sesión"
+        cancelText="Cancelar"
+        :confirmClass="'bg-red-600 hover:bg-red-700 focus:ring-red-500'"
+        :loading="loggingOut"
+        @confirm="confirmLogout"
+        @cancel="showLogoutModal = false"
+      />
+
     </div>
   </div>
 </template>
@@ -212,10 +238,12 @@
 import { ref, computed } from 'vue'
 import { useAuth } from '../../composables/useAuth.js'
 import { useRouter } from 'vue-router'
+import ConfirmModal from '../../components/common/ConfirmModal.vue'
 
 const { user, createUserProfile, verifyProjectCode, logout } = useAuth()
 const router = useRouter()
 
+// Estados principales
 const step = ref(1)
 const selectedRole = ref(null)
 const projectCodeInput = ref('')
@@ -224,6 +252,15 @@ const error = ref('')
 const loading = ref(false)
 const generatedCode = ref('')
 
+// Estados para copy code
+const codeCopied = ref(false)
+const copyError = ref(false)
+
+// Estados para logout modal
+const showLogoutModal = ref(false)
+const loggingOut = ref(false)
+
+// Computed properties
 const userEmail = computed(() => {
   return user.value?.email || 'usuario@email.com'
 })
@@ -233,12 +270,14 @@ const userInitial = computed(() => {
   return email.charAt(0).toUpperCase()
 })
 
+// Función para generar código único
 const generateUniqueCode = () => {
   const timestamp = Date.now().toString(36)
   const random = Math.random().toString(36).substring(2, 6)
   return (timestamp.substring(timestamp.length - 4) + random).toUpperCase()
 }
 
+// Función para seleccionar rol
 const selectRole = (role) => {
   selectedRole.value = role
   codeError.value = ''
@@ -250,34 +289,45 @@ const selectRole = (role) => {
   }
 }
 
+// Función para avanzar al siguiente paso
 const nextStep = () => {
   if (selectedRole.value) {
     step.value = 2
   }
 }
 
+// Función para copiar código (CON FEEDBACK VISUAL)
 const copyCode = async () => {
   try {
     await navigator.clipboard.writeText(generatedCode.value)
-    alert('✓ Código copiado al portapapeles')
+    codeCopied.value = true
+    copyError.value = false
+    setTimeout(() => {
+      codeCopied.value = false
+    }, 2000)
   } catch (err) {
     console.error('Error copiando código:', err)
-    alert('✗ No se pudo copiar el código')
+    copyError.value = true
+    setTimeout(() => {
+      copyError.value = false
+    }, 2000)
   }
 }
 
-const handleLogout = async () => {
-  const confirmed = confirm('¿Estás seguro de que quieres cerrar sesión? Perderás el progreso de configuración.')
-  
-  if (confirmed) {
-    try {
-      await logout()
-    } catch (err) {
-      console.error('Error cerrando sesión:', err)
-    }
+// Función para confirmar logout (CON MODAL)
+const confirmLogout = async () => {
+  try {
+    loggingOut.value = true
+    await logout()
+  } catch (err) {
+    console.error('Error cerrando sesión:', err)
+  } finally {
+    loggingOut.value = false
+    showLogoutModal.value = false
   }
 }
 
+// Función para confirmar setup
 const confirmSetup = async () => {
   loading.value = true
   error.value = ''
@@ -304,6 +354,7 @@ const confirmSetup = async () => {
       await createUserProfile(selectedRole.value, generatedCode.value)
     }
 
+    // Redirigir según el rol
     if (selectedRole.value === 'operator') {
       await router.push('/inventory')
     } else {
