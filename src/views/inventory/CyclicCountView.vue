@@ -81,7 +81,7 @@
 
               <!-- Instrucciones -->
               <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/70 text-white px-4 py-2 rounded-lg text-sm">
-                Centra el código QR en el marco
+                {{ scanningMessage }}
               </div>
             </div>
           </div>
@@ -237,6 +237,15 @@
         :duration="4000"
         @close="showErrorToast = false"
       />
+
+      <Toast
+        :show="showCameraErrorToast"
+        type="error"
+        title="Error de cámara"
+        :message="cameraErrorMessage"
+        :duration="5000"
+        @close="showCameraErrorToast = false"
+      />
     </div>
   </DashboardLayout>
 </template>
@@ -246,6 +255,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import DashboardLayout from '../../components/layout/DashboardLayout.vue'
 import Toast from '../../components/common/Toast.vue'
 import { useProducts } from '../../composables/useProducts.js'
+import { BrowserQRCodeReader } from '@zxing/library'
 
 const { products, loadProducts, updateProduct } = useProducts()
 
@@ -254,6 +264,11 @@ const isScanning = ref(false)
 const videoElement = ref(null)
 const manualProductId = ref('')
 const searching = ref(false)
+const scanningMessage = ref('Centra el código QR en el marco')
+
+// Instancia del lector QR
+let codeReader = null
+let scanningActive = false
 
 // Producto actual
 const currentProduct = ref(null)
@@ -265,6 +280,8 @@ const updating = ref(false)
 const showSuccessToast = ref(false)
 const showErrorToast = ref(false)
 const errorMessage = ref('')
+const showCameraErrorToast = ref(false)
+const cameraErrorMessage = ref('')
 
 // Computed
 const hasDifference = computed(() => {
@@ -276,17 +293,162 @@ const difference = computed(() => {
   return physicalCount.value - currentProduct.value.stock
 })
 
-// Métodos
-const startScanning = () => {
-  isScanning.value = true
-  // TODO: Implementar lógica de cámara y escaneo QR
-  console.log('📸 Iniciando escáner de cámara...')
+// Métodos de escaneo
+const startScanning = async () => {
+  try {
+    scanningMessage.value = 'Iniciando cámara...'
+    
+    // Verificar permisos y disponibilidad de cámara
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      cameraErrorMessage.value = 'Tu navegador no soporta acceso a cámara'
+      showCameraErrorToast.value = true
+      return
+    }
+
+    // Inicializar lector QR si no existe
+    if (!codeReader) {
+      codeReader = new BrowserQRCodeReader()
+    }
+
+    // Listar dispositivos de video disponibles
+    const videoInputDevices = await codeReader.listVideoInputDevices()
+    
+    if (videoInputDevices.length === 0) {
+      cameraErrorMessage.value = 'No se encontró ninguna cámara en tu dispositivo'
+      showCameraErrorToast.value = true
+      return
+    }
+
+    // Buscar cámara trasera o usar la primera disponible
+    let selectedDevice = videoInputDevices[0].deviceId
+    
+    // Intentar encontrar cámara trasera
+    const backCamera = videoInputDevices.find(device => 
+      device.label.toLowerCase().includes('back') || 
+      device.label.toLowerCase().includes('rear') ||
+      device.label.toLowerCase().includes('trasera')
+    )
+    
+    if (backCamera) {
+      selectedDevice = backCamera.deviceId
+    }
+
+    isScanning.value = true
+    scanningActive = true
+    scanningMessage.value = 'Centra el código QR en el marco'
+
+    // Comenzar decodificación continua
+    codeReader.decodeFromVideoDevice(
+      selectedDevice,
+      videoElement.value,
+      (result, error) => {
+        // Solo procesar si el escaneo está activo
+        if (!scanningActive) return
+
+        if (result) {
+          handleQRCodeDetected(result.getText())
+        }
+      }
+    )
+  } catch (error) {
+    
+    if (error.name === 'NotAllowedError') {
+      cameraErrorMessage.value = 'Permiso de cámara denegado. Por favor permite el acceso a la cámara.'
+    } else if (error.name === 'NotFoundError') {
+      cameraErrorMessage.value = 'No se encontró ninguna cámara en tu dispositivo'
+    } else if (error.name === 'NotReadableError') {
+      cameraErrorMessage.value = 'La cámara está siendo utilizada por otra aplicación'
+    } else {
+      cameraErrorMessage.value = `Error al acceder a la cámara: ${error.message}`
+    }
+    
+    showCameraErrorToast.value = true
+    stopScanning()
+  }
 }
 
 const stopScanning = () => {
+  
   isScanning.value = false
-  // TODO: Detener cámara
-  console.log('📸 Deteniendo escáner...')
+  scanningActive = false
+  scanningMessage.value = 'Centra el código QR en el marco'
+  
+  // Detener el lector QR y resetear
+  if (codeReader) {
+    try {
+      codeReader.reset()
+    } catch (error) {
+      console.error('⚠️ Error al detener escáner:', error)
+    }
+  }
+  
+  // Limpiar el video element
+  if (videoElement.value) {
+    videoElement.value.srcObject = null
+  }
+}
+
+const handleQRCodeDetected = async (qrText) => {
+  
+  // Detener escaneo inmediatamente para evitar múltiples lecturas
+  scanningActive = false
+  scanningMessage.value = '¡QR detectado! Buscando producto...'
+  
+  // Vibración si está disponible
+  if (navigator.vibrate) {
+    navigator.vibrate(200)
+  }
+  
+  // Buscar el producto por el ID escaneado
+  try {
+    await loadProducts()
+    
+    const product = products.value.find(p => 
+      p.productId?.toUpperCase() === qrText.toUpperCase()
+    )
+    
+    if (product) {
+      
+      currentProduct.value = { ...product }
+      physicalCount.value = product.stock
+      countNotes.value = ''
+      
+      // Detener escaneo completamente
+      stopScanning()
+      
+      // Scroll al formulario
+      setTimeout(() => {
+        const formElement = document.querySelector('form')
+        if (formElement) {
+          formElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        }
+      }, 100)
+    } else {
+      
+      errorMessage.value = `Producto con ID ${qrText} no encontrado`
+      showErrorToast.value = true
+      
+      // Reactivar escaneo después de 2 segundos
+      setTimeout(() => {
+        if (isScanning.value) {
+          scanningActive = true
+          scanningMessage.value = 'Centra el código QR en el marco'
+        }
+      }, 2000)
+    }
+  } catch (error) {
+    
+    errorMessage.value = 'Error al buscar el producto escaneado'
+    showErrorToast.value = true
+    
+    // Reactivar escaneo después de 2 segundos
+    setTimeout(() => {
+      if (isScanning.value) {
+        scanningActive = true
+        scanningMessage.value = 'Centra el código QR en el marco'
+      }
+    }, 2000)
+  }
 }
 
 const searchProduct = async () => {
@@ -311,7 +473,6 @@ const searchProduct = async () => {
       showErrorToast.value = true
     }
   } catch (error) {
-    console.error('Error buscando producto:', error)
     errorMessage.value = 'Error al buscar el producto'
     showErrorToast.value = true
   } finally {
@@ -333,7 +494,6 @@ const updatePhysicalCount = async () => {
     showSuccessToast.value = true
     clearProduct()
   } catch (error) {
-    console.error('Error actualizando stock:', error)
     errorMessage.value = 'No se pudo actualizar el stock'
     showErrorToast.value = true
   } finally {
@@ -358,6 +518,10 @@ onMounted(async () => {
 onUnmounted(() => {
   if (isScanning.value) {
     stopScanning()
+  }
+  if (codeReader) {
+    codeReader.reset()
+    codeReader = null
   }
 })
 </script>
