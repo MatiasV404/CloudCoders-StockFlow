@@ -8,7 +8,10 @@
 - [REFACTORING] Cerrar sesión: Las acciones de cierre de sesión se migraron a modales reutilizables.
 
 **NEW: Toast component**
-- [FEAT] Nuevo componente reutilizable: Toast.vue.
+- [FEAT] Nuevo componente reutilizable: Toast.vue, implementado en ModalQR inicialmente.
+
+**UPDATED: Modales de productos sin router**
+- [FIXED] Se arregla capas modales que se muestran al interactuar con los productos.
 
 ## v1.2.0 - Códigos QR y Trazabilidad de Productos
 

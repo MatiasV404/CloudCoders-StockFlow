@@ -50,7 +50,6 @@ export function useProducts() {
   const statuses = [
     'Activo',
     'Inactivo',
-    'Bajo Stock',
     'Agotado',
     'Descontinuado'
   ]
