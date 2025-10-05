@@ -1,8 +1,15 @@
 # 📋 Notas de Versión - StockFlow
 
+## v1.3.0 - Integración de recuento cíclico
+
+**Posted on 05-10-2025**
+
+**NEW: Incorporación de cámara para escanear QRs**
+- [FEAT] Nueva vista CyclicCountView.vue con acceso a usuarios con rol de administración u operario. Cuenta con acceso a cámara del dispositivo o ingreso manual del ID del producto para realizar un recuento del stock físico del producto.
+
 ## v1.2.1 - Alertas migradas a modales personalizados
 
-**Posted on 06-10-2025**
+**Posted on 05-10-2025**
 
 **UPDATED: Alertas y confirmacione personalizadas**
 - [REFACTORING] Cerrar sesión: Las acciones de cierre de sesión se migraron a modales reutilizables.
