@@ -1,128 +1,156 @@
-import { ref, computed } from "vue";
-import {
-  collection,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  doc,
-  getDocs,
-  query,
+import { ref, computed } from 'vue'
+import { 
+  collection, 
+  addDoc, 
+  updateDoc, 
+  deleteDoc, 
+  doc, 
+  getDocs, 
+  query, 
   orderBy,
-  onSnapshot,
   where,
-} from "firebase/firestore";
-import { db } from "../firebase/firebase.js";
-import { useAuth } from "./useAuth.js";
+  onSnapshot,
+  getDoc
+} from 'firebase/firestore'
+import { db } from '../firebase/firebase.js'
+import { useAuth } from './useAuth.js'
 
 export function useProducts() {
-  const { user, userProfile } = useAuth();
-  const products = ref([]);
-  const loading = ref(false);
-  const error = ref(null);
-  const adminUserId = ref(null);
+  const { user, userProfile } = useAuth()
+  
+  const products = ref([])
+  const loading = ref(false)
+  const error = ref(null)
+  const adminUserId = ref(null)
 
   // Categorías disponibles
   const categories = [
-    "Computadoras",
-    "Periféricos",
-    "Impresoras",
-    "Monitores",
-    "Accesorios",
-    "Software",
-    "Hardware",
-    "Networking",
-    "Otros",
-  ];
+    'Electrónica',
+    'Ropa',
+    'Alimentos',
+    'Hogar',
+    'Deportes',
+    'Juguetes',
+    'Libros',
+    'Salud',
+    'Belleza',
+    'Automotriz',
+    'Mascotas',
+    'Jardinería',
+    'Oficina',
+    'Bebés',
+    'Música',
+    'Herramientas',
+    'Construcción',
+    'Tecnología',
+    'Muebles',
+    'Otros'
+  ]
 
-  // Estados de producto
-  const statuses = ["Activo", "Inactivo", "Agotado", "Descontinuado"];
+  const statuses = [
+    'Activo',
+    'Inactivo',
+    'Bajo Stock',
+    'Agotado',
+    'Descontinuado'
+  ]
 
+  const generateProductId = () => {
+    const timestamp = Date.now().toString(36).toUpperCase()
+    const random = Math.random().toString(36).substring(2, 8).toUpperCase()
+    return `PRD-${timestamp}-${random}`
+  }
+
+  // Buscar el UID del admin
   const findAdminUserId = async () => {
     if (!user.value?.uid || !userProfile.value?.projectCode) {
-      return null;
+      return null
     }
 
     try {
-      // Si el usuario actual es admin, usar su UID
-      if (userProfile.value.role === "admin") {
-        return user.value.uid;
+      if (userProfile.value.role === 'admin') {
+        return user.value.uid
       }
 
-      // Si es operario, buscar el admin por projectCode
-      const usersRef = collection(db, "users");
+      const usersRef = collection(db, 'users')
       const q = query(
-        usersRef,
-        where("projectCode", "==", userProfile.value.projectCode),
-        where("role", "==", "admin") // ✅ SIMPLIFICADO: Solo buscar 'admin'
-      );
-      const querySnapshot = await getDocs(q);
+        usersRef, 
+        where('projectCode', '==', userProfile.value.projectCode),
+        where('role', '==', 'admin')
+      )
+      const querySnapshot = await getDocs(q)
 
       if (!querySnapshot.empty) {
-        return querySnapshot.docs[0].id;
+        return querySnapshot.docs[0].id
       }
 
-      return null;
+      return null
     } catch (err) {
-      console.error("Error buscando admin:", err);
-      return null;
+      console.error('Error buscando admin:', err)
+      return null
     }
-  };
+  }
 
-  // Referencia a la colección de productos
   const getProductsCollection = async () => {
-    if (!user.value?.uid) {
-      throw new Error("Usuario no autenticado");
-    }
-
-    // Encontrar el admin del proyecto
     if (!adminUserId.value) {
-      adminUserId.value = await findAdminUserId();
+      adminUserId.value = await findAdminUserId()
     }
 
     if (!adminUserId.value) {
-      throw new Error("No se encontró el administrador del proyecto");
+      throw new Error('No se pudo encontrar el administrador del proyecto')
     }
 
-    return collection(db, `users/${adminUserId.value}/products`);
-  };
+    return collection(db, `users/${adminUserId.value}/products`)
+  }
 
-  // Cargar productos del usuario
+  // Stats computados
+  const stats = computed(() => {
+    const totalProducts = products.value.length
+    const lowStock = products.value.filter(p => p.stock > 0 && p.stock <= (p.minStock || 5)).length
+    const outOfStock = products.value.filter(p => p.stock === 0).length
+    const totalValue = products.value.reduce((sum, p) => sum + (p.price * p.stock), 0)
+
+    return {
+      totalProducts,
+      lowStock,
+      outOfStock,
+      totalValue
+    }
+  })
+
+  // Cargar productos
   const loadProducts = async () => {
-    if (!user.value?.uid) {
-      error.value = "Usuario no autenticado";
-      return;
-    }
-
     try {
-      loading.value = true;
-      error.value = null;
+      loading.value = true
+      error.value = null
 
-      const productsRef = await getProductsCollection();
-      const q = query(productsRef, orderBy("createdAt", "desc"));
-      const querySnapshot = await getDocs(q);
+      const productsRef = await getProductsCollection()
+      const q = query(productsRef, orderBy('createdAt', 'desc'))
+      const querySnapshot = await getDocs(q)
 
-      products.value = querySnapshot.docs.map((doc) => ({
+      products.value = querySnapshot.docs.map(doc => ({
         id: doc.id,
-        ...doc.data(),
-      }));
+        ...doc.data()
+      }))
     } catch (err) {
-      console.error("Error cargando productos:", err);
-      error.value = "Error al cargar productos: " + err.message;
+      console.error('Error cargando productos:', err)
+      error.value = 'Error al cargar productos'
+      throw err
     } finally {
-      loading.value = false;
+      loading.value = false
     }
-  };
+  }
 
-  // Escuchar cambios en tiempo real
+  // Suscripción en tiempo real
   const subscribeToProducts = async () => {
     if (!user.value?.uid) {
-      console.warn("⚠️ No se puede suscribir: usuario no autenticado");
-      return null;
+      console.warn('⚠️ No se puede suscribir: usuario no autenticado')
+      return null
     }
 
     try {
-      const productsRef = await getProductsCollection();
-      const q = query(productsRef, orderBy("createdAt", "desc"));
+      const productsRef = await getProductsCollection()
+      const q = query(productsRef, orderBy("createdAt", "desc"))
 
       const unsubscribeFn = onSnapshot(
         q,
@@ -130,166 +158,123 @@ export function useProducts() {
           products.value = querySnapshot.docs.map((doc) => ({
             id: doc.id,
             ...doc.data(),
-          }));
+          }))
         },
         (err) => {
-          console.error("❌ Error en suscripción:", err);
-          error.value = "Error al sincronizar productos: " + err.message;
+          console.error("❌ Error en suscripción:", err)
+          error.value = "Error al sincronizar productos: " + err.message
         }
-      );
-      return unsubscribeFn;
-    } catch (err) {
-      console.error("❌ Error suscribiéndose a productos:", err);
-      error.value = "Error al suscribirse: " + err.message;
-      return null;
-    }
-  };
+      )
 
-  // Agregar producto
+      return unsubscribeFn
+    } catch (err) {
+      console.error("❌ Error suscribiéndose a productos:", err)
+      error.value = "Error al suscribirse: " + err.message
+      return null
+    }
+  }
+
   const addProduct = async (productData) => {
     if (!user.value?.uid) {
-      throw new Error("Usuario no autenticado");
+      throw new Error('Usuario no autenticado')
     }
 
     try {
-      loading.value = true;
-      error.value = null;
+      loading.value = true
+      error.value = null
 
-      const productsRef = await getProductsCollection();
-
-      // Usar el UID del admin como userId
+      const productsRef = await getProductsCollection()
+      
+      const productId = generateProductId()
+      
       const newProduct = {
         ...productData,
+        productId,
         createdAt: new Date(),
         updatedAt: new Date(),
-        userId: adminUserId.value, // CAMBIADO: usar UID del admin
-        addedBy: user.value.uid, // NUEVO: guardar quién agregó el producto
-      };
+        addedBy: user.value.uid,
+        userId: adminUserId.value
+      }
 
-      const docRef = await addDoc(productsRef, newProduct);
-      return docRef.id;
+      const docRef = await addDoc(productsRef, newProduct)
+      return docRef.id
+      
     } catch (err) {
-      console.error("Error agregando producto:", err);
-      error.value = "Error al agregar producto: " + err.message;
-      throw err;
+      console.error('Error agregando producto:', err)
+      error.value = 'Error al agregar producto'
+      throw err
     } finally {
-      loading.value = false;
+      loading.value = false
     }
-  };
+  }
 
   // Actualizar producto
   const updateProduct = async (productId, productData) => {
     if (!user.value?.uid) {
-      throw new Error("Usuario no autenticado");
+      throw new Error('Usuario no autenticado')
     }
 
     try {
-      loading.value = true;
-      error.value = null;
+      loading.value = true
+      error.value = null
 
-      // Usar el UID del admin
-      if (!adminUserId.value) {
-        adminUserId.value = await findAdminUserId();
-      }
+      const productsRef = await getProductsCollection()
+      const productRef = doc(productsRef, productId)
 
-      const productRef = doc(
-        db,
-        `users/${adminUserId.value}/products/${productId}`
-      );
-      const updatedProduct = {
+      await updateDoc(productRef, {
         ...productData,
         updatedAt: new Date(),
-        updatedBy: user.value.uid, // NUEVO: guardar quién actualizó
-      };
-
-      await updateDoc(productRef, updatedProduct);
+        updatedBy: user.value.uid
+      })
+      
     } catch (err) {
-      console.error("Error actualizando producto:", err);
-      error.value = "Error al actualizar producto: " + err.message;
-      throw err;
+      console.error('Error actualizando producto:', err)
+      error.value = 'Error al actualizar producto'
+      throw err
     } finally {
-      loading.value = false;
+      loading.value = false
     }
-  };
+  }
 
   // Eliminar producto
   const deleteProduct = async (productId) => {
     if (!user.value?.uid) {
-      throw new Error("Usuario no autenticado");
+      throw new Error('Usuario no autenticado')
     }
 
     try {
-      loading.value = true;
-      error.value = null;
+      loading.value = true
+      error.value = null
 
-      // Usar el UID del admin
-      if (!adminUserId.value) {
-        adminUserId.value = await findAdminUserId();
-      }
+      const productsRef = await getProductsCollection()
+      const productRef = doc(productsRef, productId)
 
-      const productRef = doc(
-        db,
-        `users/${adminUserId.value}/products/${productId}`
-      );
-      await deleteDoc(productRef);
+      await deleteDoc(productRef)
+      
     } catch (err) {
-      console.error("Error eliminando producto:", err);
-      error.value = "Error al eliminar producto: " + err.message;
-      throw err;
+      console.error('Error eliminando producto:', err)
+      error.value = 'Error al eliminar producto'
+      throw err
     } finally {
-      loading.value = false;
+      loading.value = false
     }
-  };
+  }
 
-  // Computed para estadísticas
-  const stats = computed(() => {
-    const totalProducts = products.value.length;
-    const lowStock = products.value.filter(
-      (p) => p.stock <= (p.minStock || 5)
-    ).length;
-    const outOfStock = products.value.filter((p) => p.stock === 0).length;
-    const totalValue = products.value.reduce(
-      (sum, p) => sum + p.price * p.stock,
-      0
-    );
-    const activeProducts = products.value.filter(
-      (p) => p.status === "Activo"
-    ).length;
-
-    return {
-      totalProducts,
-      lowStock,
-      outOfStock,
-      totalValue,
-      activeProducts,
-    };
-  });
+  const findProductByProductId = (productId) => {
+    return products.value.find(p => p.productId === productId)
+  }
 
   // Buscar productos
   const searchProducts = (searchTerm) => {
-    if (!searchTerm.trim()) return products.value;
-
-    const term = searchTerm.toLowerCase();
-    return products.value.filter(
-      (product) =>
-        product.name?.toLowerCase().includes(term) ||
-        product.code?.toLowerCase().includes(term) ||
-        product.sku?.toLowerCase().includes(term) ||
-        product.category?.toLowerCase().includes(term)
-    );
-  };
-
-  // Filtrar productos por categoría
-  const filterByCategory = (category) => {
-    if (!category) return products.value;
-    return products.value.filter((product) => product.category === category);
-  };
-
-  // Filtrar productos por estado
-  const filterByStatus = (status) => {
-    if (!status) return products.value;
-    return products.value.filter((product) => product.status === status);
-  };
+    const term = searchTerm.toLowerCase()
+    return products.value.filter(product => 
+      product.name.toLowerCase().includes(term) ||
+      product.code?.toLowerCase().includes(term) ||
+      product.sku?.toLowerCase().includes(term) ||
+      product.productId?.toLowerCase().includes(term) ||
+      product.category?.toLowerCase().includes(term)
+    )
+  }
 
   return {
     products,
@@ -304,7 +289,6 @@ export function useProducts() {
     updateProduct,
     deleteProduct,
     searchProducts,
-    filterByCategory,
-    filterByStatus,
-  };
+    findProductByProductId
+  }
 }

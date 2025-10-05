@@ -1,5 +1,27 @@
 # 📋 Notas de Versión - StockFlow
 
+## v1.2.0 - Códigos QR y Trazabilidad de Productos
+
+**Posted on 05-10-2025**
+
+**NEW: Sistema de Códigos QR**
+- [FEAT] ID único legible para cada producto (formato PRD-XXXXX-XXXXX)
+- [FEAT] Generación automática de código QR al crear productos
+- [FEAT] Visualización de QR en modal de producto
+- [FEAT] Descarga de QR como imagen PNG
+- [FEAT] Impresión de QR con información del producto
+- [FEAT] Copia rápida de ID al portapapeles
+
+**NEW: Búsqueda Mejorada**
+- [FEAT] Búsqueda de productos por ID único
+- [FEAT] Badge visual de productId en tabla de inventario
+- [FEAT] Preparación para escaneo de QR (próxima versión)
+
+**REFACTORING: Modelo de Datos**
+- [REFACTORING] Campo productId agregado a productos
+- [REFACTORING] Función generateProductId() en useProducts
+- [REFACTORING] Búsqueda mejorada incluyendo productId
+
 ## v1.1.0 - Sistema de roles y colaboración
 
 **Posted on 05-10-2025**

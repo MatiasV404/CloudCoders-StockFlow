@@ -1,25 +1,47 @@
 <template>
-  <div v-if="show" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-    <!-- Overlay -->
-    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:p-0">
-      <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="closeModal"></div>
-
-      <!-- Modal panel -->
-      <div class="relative inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full sm:p-6">
-        
+  <div
+    v-if="show"
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+    @click.self="closeModal"
+  >
+    <div
+      class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto"
+      @click.stop
+    >
+      <div class="p-6 sm:p-8">
         <!-- Header -->
         <div class="flex items-center justify-between mb-6">
-          <h3 class="text-2xl font-bold text-gray-900">
-            {{ isEditing ? 'Editar Producto' : 'Agregar Producto' }}
-          </h3>
+          <h2 class="text-2xl font-bold text-gray-800 m-0">
+            {{ isEditing ? 'Editar Producto' : 'Nuevo Producto' }}
+          </h2>
           <button
             @click="closeModal"
+            type="button"
             class="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-full"
           >
             <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
               <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" />
             </svg>
           </button>
+        </div>
+
+        <div v-if="isEditing && product?.productId" class="mb-6 bg-blue-50 border-2 border-blue-200 rounded-xl p-4">
+          <div class="flex items-start gap-4">
+            <div class="flex-shrink-0">
+              <svg class="w-6 h-6 text-blue-600" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M3,11H5V13H3V11M11,5H13V9H11V5M9,11H13V15H11V13H9V11M15,11H17V13H19V11H21V13H19V15H21V19H19V21H17V19H13V21H11V17H15V15H17V13H15V11M19,19V15H17V19H19M15,3H21V9H15V3M17,5V7H19V5H17M3,3H9V9H3V3M5,5V7H7V5H5M3,15H9V21H3V15M5,17V19H7V17H5Z" />
+              </svg>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-sm font-semibold text-blue-900 mb-2">Código QR del Producto</h3>
+              <button
+                @click="showQRModal = true"
+                class="text-sm text-blue-600 hover:text-blue-700 font-medium underline"
+              >
+                Ver y descargar código QR
+              </button>
+            </div>
+          </div>
         </div>
 
         <!-- Form -->
@@ -101,10 +123,8 @@
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                 :class="{ 'border-red-500': errors.category }"
               >
-                <option value="">Selecciona una categoría</option>
-                <option v-for="category in categories" :key="category" :value="category">
-                  {{ category }}
-                </option>
+                <option value="" disabled>Selecciona una categoría</option>
+                <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
               </select>
               <p v-if="errors.category" class="mt-1 text-sm text-red-600">{{ errors.category }}</p>
             </div>
@@ -120,10 +140,8 @@
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                 :class="{ 'border-red-500': errors.status }"
               >
-                <option value="">Selecciona un estado</option>
-                <option v-for="status in statuses" :key="status" :value="status">
-                  {{ status }}
-                </option>
+                <option value="" disabled>Selecciona un estado</option>
+                <option v-for="st in statuses" :key="st" :value="st">{{ st }}</option>
               </select>
               <p v-if="errors.status" class="mt-1 text-sm text-red-600">{{ errors.status }}</p>
             </div>
@@ -201,53 +219,37 @@
                   step="0.01"
                   placeholder="0.00"
                   class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                  :class="{ 'border-red-500': errors.cost }"
                 />
               </div>
-              <p class="mt-1 text-sm text-gray-500">Para cálculo de rentabilidad</p>
-            </div>
-          </div>
-
-          <!-- Información adicional -->
-          <div v-if="isEditing && product" class="bg-gray-50 p-4 rounded-lg">
-            <h4 class="text-sm font-medium text-gray-700 mb-2">Información del producto</h4>
-            <div class="grid grid-cols-2 gap-4 text-sm text-gray-600">
-              <div>
-                <span class="font-medium">Creado:</span> 
-                {{ formatDate(product.createdAt) }}
-              </div>
-              <div v-if="product.updatedAt">
-                <span class="font-medium">Última actualización:</span> 
-                {{ formatDate(product.updatedAt) }}
-              </div>
+              <p v-if="errors.cost" class="mt-1 text-sm text-red-600">{{ errors.cost }}</p>
             </div>
           </div>
 
           <!-- Error general -->
-          <div v-if="generalError" class="bg-red-50 border border-red-200 rounded-lg p-3">
-            <div class="flex">
-              <svg class="w-5 h-5 text-red-400 mt-0.5 mr-2" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M13,14H11V10H13M13,18H11V16H13M1,21H23L12,2L1,21Z" />
-              </svg>
-              <p class="text-sm text-red-700">{{ generalError }}</p>
-            </div>
+          <div v-if="generalError" class="bg-red-50 border-2 border-red-200 rounded-lg p-4 flex items-start gap-3">
+            <svg class="w-6 h-6 text-red-500 flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M13,14H11V10H13M13,18H11V16H13M1,21H23L12,2L1,21Z" />
+            </svg>
+            <p class="text-sm text-red-700">{{ generalError }}</p>
           </div>
 
-          <!-- Buttons -->
-          <div class="flex justify-end gap-3 pt-6 border-t border-gray-200">
+          <!-- Botones -->
+          <div class="flex flex-col sm:flex-row gap-3">
             <button
               type="button"
               @click="closeModal"
-              class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
               :disabled="saving"
+              class="flex-1 bg-white border-2 border-gray-300 text-gray-700 px-6 py-3 rounded-lg font-medium transition-colors hover:bg-gray-50 disabled:opacity-50"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              class="px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               :disabled="saving"
+              class="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg font-medium transition-colors hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              <svg v-if="saving" class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="currentColor">
+              <svg v-if="saving" class="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12,1A11,11 0 1 0 23,12A11,11 0 0 0 12,1Zm0,19a8,8 0 1 1 8-8A8,8 0 0 1 12,20Z" opacity=".25"/>
                 <path d="M10.14,1.16a11,11 0 0 0-9,8.92A1.59,1.59 0 0 0 2.46,12,1.52,1.52 0 0 0 4.11,10.7a8,8 0 0 1 6.66-6.61A1.42,1.42 0 0 0 12,2.69h0A1.57,1.57 0 0 0 10.14,1.16Z"/>
               </svg>
@@ -257,11 +259,40 @@
         </form>
       </div>
     </div>
+
+    <div
+      v-if="showQRModal"
+      class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[60] p-4"
+      @click.self="showQRModal = false"
+    >
+      <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full" @click.stop>
+        <div class="p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xl font-bold text-gray-800">Código QR</h3>
+            <button
+              @click="showQRModal = false"
+              class="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-100 rounded-full"
+            >
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" />
+              </svg>
+            </button>
+          </div>
+
+          <ProductQRCode
+            :product-id="product?.productId"
+            :product-name="product?.name"
+            :size="250"
+          />
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, computed, watch, nextTick } from 'vue'
+import ProductQRCode from './ProductQRCode.vue'
 
 const props = defineProps({
   show: {
@@ -302,6 +333,7 @@ const form = reactive({
 const errors = ref({})
 const generalError = ref('')
 const saving = ref(false)
+const showQRModal = ref(false)
 
 // Computed
 const isEditing = computed(() => !!props.product?.id)
@@ -314,10 +346,11 @@ watch(() => props.show, (show) => {
       loadProductData()
     }
     nextTick(() => {
-      // Focus en el primer campo
       const firstInput = document.getElementById('name')
       if (firstInput) firstInput.focus()
     })
+  } else {
+    showQRModal.value = false
   }
 })
 
@@ -388,7 +421,6 @@ const handleSubmit = async () => {
     return
   }
 
-  // Determinar estado automático basado en stock
   let finalStatus = form.status
   if (form.stock === 0) {
     finalStatus = 'Agotado'
@@ -428,18 +460,5 @@ const closeModal = () => {
   if (!saving.value) {
     emit('close')
   }
-}
-
-const formatDate = (date) => {
-  if (!date) return 'N/A'
-  
-  const d = date.toDate ? date.toDate() : new Date(date)
-  return d.toLocaleDateString('es-CL', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
 }
 </script>

@@ -163,7 +163,10 @@
           <table class="w-full">
             <thead class="bg-gray-50">
               <tr>
-                <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                <!-- ✅ HEADERS CORREGIDOS -->
+                <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">#</th>
+                <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Product ID
+                </th>
                 <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Código/SKU
                 </th>
                 <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
@@ -176,8 +179,9 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
+              <!-- Estado vacío -->
               <tr v-if="filteredProducts.length === 0">
-                <td colspan="8" class="px-6 py-8 text-center text-gray-500">
+                <td colspan="9" class="px-6 py-8 text-center text-gray-500">
                   <div class="flex flex-col items-center gap-2">
                     <svg class="w-12 h-12 text-gray-300" viewBox="0 0 24 24" fill="currentColor">
                       <path
@@ -188,24 +192,50 @@
                   </div>
                 </td>
               </tr>
+
+              <!-- ✅ FILAS CORREGIDAS -->
               <tr v-for="(product, index) in filteredProducts" :key="product.id" class="hover:bg-gray-50">
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <!-- Columna 1: Índice numérico -->
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
                   {{ index + 1 }}
                 </td>
+
+                <!-- Columna 2: Product ID con icono QR -->
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm font-medium text-gray-900">{{ product.code || product.sku }}</div>
+                  <span
+                    class="inline-flex items-center gap-1 px-2 py-1 bg-indigo-100 text-indigo-800 rounded-full text-xs font-mono font-semibold">
+                    <svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
+                      <path
+                        d="M3,11H5V13H3V11M11,5H13V9H11V5M9,11H13V15H11V13H9V11M15,11H17V13H19V11H21V13H19V15H21V19H19V21H17V19H13V21H11V17H15V15H17V13H15V11M19,19V15H17V19H19M15,3H21V9H15V3M17,5V7H19V5H17M3,3H9V9H3V3M5,5V7H7V5H5M3,15H9V21H3V15M5,17V19H7V17H5Z" />
+                    </svg>
+                    {{ product.productId || 'N/A' }}
+                  </span>
                 </td>
+
+                <!-- Columna 3: Código/SKU (CORREGIDO) -->
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm font-medium text-gray-900">
+                    {{ product.code || product.sku || 'N/A' }}
+                  </div>
+                </td>
+
+                <!-- Columna 4: Nombre -->
                 <td class="px-6 py-4">
                   <div class="text-sm font-medium text-gray-900">{{ product.name }}</div>
-                  <div v-if="product.description" class="text-sm text-gray-500 max-w-xs truncate">{{ product.description
-                    }}</div>
+                  <div v-if="product.description" class="text-sm text-gray-500 max-w-xs truncate">
+                    {{ product.description }}
+                  </div>
                 </td>
+
+                <!-- Columna 5: Categoría -->
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span
                     class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                     {{ product.category }}
                   </span>
                 </td>
+
+                <!-- Columna 6: Stock -->
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
                     <span class="text-sm font-medium text-gray-900">{{ product.stock }}</span>
@@ -216,15 +246,21 @@
                     </span>
                   </div>
                 </td>
+
+                <!-- Columna 7: Precio -->
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   ${{ formatCurrency(product.price) }}
                 </td>
+
+                <!-- Columna 8: Estado -->
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
                     :class="getStatusClass(product.status)">
                     {{ product.status }}
                   </span>
                 </td>
+
+                <!-- Columna 9: Acciones -->
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div class="flex gap-2">
                     <button @click="editProduct(product)"
@@ -303,7 +339,7 @@ let unsubscribe = null
 onMounted(async () => {
   try {
     await loadProducts()
-    
+
     // Intentar suscribirse
     const subscription = await subscribeToProducts()
     if (subscription && typeof subscription === 'function') {
