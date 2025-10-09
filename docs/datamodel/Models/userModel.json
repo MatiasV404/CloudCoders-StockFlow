@@ -1,0 +1,15 @@
+{
+  "uid": string,                  // Firebase Auth UID
+  "email": string,                // Email del usuario
+  "role": "admin" | "operator",   // Solo 2 roles
+  "projectCode": string,          // 8 caracteres (XXXXXXXX)
+  "createdAt": Timestamp,         // Firebase Timestamp
+  "updatedAt": Timestamp,         // Firebase Timestamp
+  "isActive": boolean,            // Estado activo/inactivo
+  "permissions": {
+    "viewDashboard": boolean,
+    "manageProducts": boolean,
+    "manageOperators": boolean,
+    "viewReports": boolean
+  }
+}
