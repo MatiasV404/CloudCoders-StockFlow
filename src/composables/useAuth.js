@@ -52,7 +52,7 @@ export function useAuth() {
     }
   }
 
-  // ✅ CORREGIDO: Solo actualizar estado, NO navegar desde aquí
+  // Solo actualizar estado, NO navegar desde aquí
   onAuthStateChanged(auth, async (firebaseUser) => {
     user.value = firebaseUser
     

@@ -57,7 +57,7 @@
       type="warning"
       title="¿Cerrar sesión?"
       message="¿Estás seguro de que quieres cerrar sesión?"
-      confirmText="Cerrar Sesión"
+      confirmText="Cerrar sesión"
       cancelText="Cancelar"
       :confirmClass="'bg-red-600 hover:bg-red-700 focus:ring-red-500'"
       :loading="loggingOut"
@@ -65,7 +65,7 @@
       @cancel="showLogoutModal = false"
     />
 
-    <!-- ✅ Toast de Error (usando componente) -->
+    <!-- Toast de Error (usando componente) -->
     <Toast
       :show="showErrorToast"
       type="error"

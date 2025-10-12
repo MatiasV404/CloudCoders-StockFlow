@@ -1,5 +1,12 @@
 # 📋 Notas de Versión - StockFlow
 
+## v1.3.1 - Restricción de acciones para roles operarios.
+
+**Posted on 12-10-2025**
+
+**NEW: Incorporación de condicional en vista de inventario**
+- [FEAT] Se integra verificación de rold eusuario, donde las acciones de agregar producto, editarlo o modificarlo se restringen solo para usuarios administradores. 
+
 ## v1.3.0 - Integración de recuento cíclico
 
 **Posted on 05-10-2025**

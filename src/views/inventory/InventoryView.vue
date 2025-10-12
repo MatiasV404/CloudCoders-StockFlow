@@ -94,7 +94,7 @@
             </div>
 
             <!-- Botón agregar -->
-            <button @click="showAddModal = true"
+            <button @click="showAddModal = true" v-if="userRole === 'admin'"
               class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 whitespace-nowrap sm:w-auto">
               <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" />
@@ -191,7 +191,7 @@
                 <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Stock</th>
                 <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Precio</th>
                 <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider" v-if="userRole === 'admin'">Acciones</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
@@ -270,14 +270,14 @@
 
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div class="flex gap-2">
-                    <button @click="editProduct(product)"
+                    <button @click="editProduct(product)" v-if="userRole === 'admin'"
                       class="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50" title="Editar">
                       <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                         <path
                           d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" />
                       </svg>
                     </button>
-                    <button @click="confirmDelete(product)"
+                    <button @click="confirmDelete(product)" v-if="userRole === 'admin'"
                       class="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50" title="Eliminar">
                       <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                         <path
@@ -310,6 +310,9 @@ import DashboardLayout from '../../components/layout/DashboardLayout.vue'
 import ProductModal from '../../components/inventory/ProductModal.vue'
 import ConfirmModal from '../../components/common/ConfirmModal.vue'
 import { useProducts } from '../../composables/useProducts.js'
+import { useAuth } from '../../composables/useAuth.js'
+
+const { user, userRole } = useAuth()
 
 const route = useRoute()
 
