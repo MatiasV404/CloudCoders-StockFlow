@@ -5,7 +5,10 @@
 **Posted on 12-10-2025**
 
 **NEW: Incorporación de condicional en vista de inventario**
-- [FEAT] Se integra verificación de rold eusuario, donde las acciones de agregar producto, editarlo o modificarlo se restringen solo para usuarios administradores. 
+- [FEAT] Se integra verificación de rold eusuario, donde las acciones de agregar producto, editarlo o modificarlo se restringen solo para usuarios administradores.
+
+**REFACTORING: DashboardView.vue - Nuevas métricas estratégicas**
+- [FEAT] Se integran nuevos gráficos para apoyar decisiones estratégicas del administrador. Se condiciona esta vista solo para administradores.
 
 ## v1.3.0 - Integración de recuento cíclico
 
