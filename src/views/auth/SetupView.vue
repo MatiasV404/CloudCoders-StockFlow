@@ -327,7 +327,6 @@ const confirmLogout = async () => {
   }
 }
 
-// Función para confirmar setup
 const confirmSetup = async () => {
   loading.value = true
   error.value = ''
@@ -335,8 +334,8 @@ const confirmSetup = async () => {
 
   try {
     if (selectedRole.value === 'operator') {
-      if (!projectCodeInput.value || projectCodeInput.value.length < 8) {
-        codeError.value = 'Ingresa un código válido de 8 caracteres'
+      if (!projectCodeInput.value || projectCodeInput.value.trim().length === 0) {
+        codeError.value = 'Ingresa un código válido'
         loading.value = false
         return
       }
@@ -349,12 +348,11 @@ const confirmSetup = async () => {
         return
       }
 
-      await createUserProfile(selectedRole.value, projectCodeInput.value.toUpperCase())
+      await createUserProfile(selectedRole.value, projectCodeInput.value.trim().toUpperCase())
     } else {
       await createUserProfile(selectedRole.value, generatedCode.value)
     }
 
-    // Redirigir según el rol
     if (selectedRole.value === 'operator') {
       await router.push('/inventory')
     } else {
@@ -362,7 +360,7 @@ const confirmSetup = async () => {
     }
 
   } catch (err) {
-    console.error('❌ Error en setup:', err)
+    console.error('Error en setup:', err)
     error.value = 'Error al configurar tu cuenta: ' + err.message
   } finally {
     loading.value = false

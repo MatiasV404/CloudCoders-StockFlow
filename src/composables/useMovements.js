@@ -19,7 +19,6 @@ export function useMovements() {
   const loading = ref(false)
   const error = ref(null)
 
-  // Tipos de movimientos
   const MOVEMENT_TYPES = {
     CREATE: 'CREATE',
     UPDATE: 'UPDATE',
@@ -27,18 +26,22 @@ export function useMovements() {
     CYCLE_COUNT: 'CYCLE_COUNT'
   }
 
-  /**
-   * Generar ID único para el movimiento
-   */
+  const normalizeCode = (code) => {
+    if (!code) return ''
+    
+    return code
+      .trim()
+      .toUpperCase()
+      .replace(/^PRD-?/i, '')
+      .replace(/[^A-Z0-9]/g, '')
+  }
+
   const generateMovementId = () => {
     const timestamp = Date.now().toString(36).toUpperCase()
     const random = Math.random().toString(36).substring(2, 8).toUpperCase()
     return `MOV-${timestamp}-${random}`
   }
 
-  /**
-   * Encontrar el admin user ID
-   */
   const findAdminUserId = async () => {
     if (!user.value?.uid || !userProfile.value?.projectCode) {
       return null
@@ -48,24 +51,26 @@ export function useMovements() {
       return user.value.uid
     }
 
+    const normalizedOperatorCode = normalizeCode(userProfile.value.projectCode)
+
     const usersRef = collection(db, 'users')
-    const q = query(
-      usersRef,
-      where('projectCode', '==', userProfile.value.projectCode),
-      where('role', '==', 'admin')
-    )
+    const q = query(usersRef, where('role', '==', 'admin'))
     const querySnapshot = await getDocs(q)
 
-    if (!querySnapshot.empty) {
-      return querySnapshot.docs[0].id
+    for (const doc of querySnapshot.docs) {
+      const userData = doc.data()
+      if (userData.projectCode) {
+        const normalizedAdminCode = normalizeCode(userData.projectCode)
+        
+        if (normalizedAdminCode === normalizedOperatorCode) {
+          return doc.id
+        }
+      }
     }
 
     return null
   }
 
-  /**
-   * Registrar creación de producto
-   */
   const logProductCreation = async (productData, productId) => {
     try {
       const adminUserId = await findAdminUserId()
@@ -107,16 +112,12 @@ export function useMovements() {
       }
 
       await addDoc(movementsRef, movement)
-      console.log('✅ Movimiento de creación registrado:', movement.movementId)
+      console.log('Movimiento de creación registrado:', movement.movementId)
     } catch (err) {
-      console.error('❌ Error registrando creación:', err)
-      // No lanzar error para no interrumpir el flujo principal
+      console.error('Error registrando creación:', err)
     }
   }
 
-  /**
-   * Registrar actualización de producto
-   */
   const logProductUpdate = async (oldProduct, newProduct, productId) => {
     try {
       const adminUserId = await findAdminUserId()
@@ -124,7 +125,6 @@ export function useMovements() {
         throw new Error('No se pudo encontrar el administrador')
       }
 
-      // Detectar cambios
       const changes = {}
       const fields = ['code', 'sku', 'name', 'description', 'category', 'status', 'stock', 'minStock', 'price', 'cost']
       
@@ -137,15 +137,13 @@ export function useMovements() {
         }
       })
 
-      // Solo registrar si hay cambios
       if (Object.keys(changes).length === 0) {
-        console.log('ℹ️ No hay cambios que registrar')
+        console.log('No hay cambios que registrar')
         return
       }
 
       const movementsRef = collection(db, `users/${adminUserId}/movements`)
       
-      // Generar descripción de cambios
       const changeDescriptions = Object.entries(changes).map(([field, change]) => {
         const fieldNames = {
           code: 'Código',
@@ -182,15 +180,12 @@ export function useMovements() {
       }
 
       await addDoc(movementsRef, movement)
-      console.log('✅ Movimiento de actualización registrado:', movement.movementId)
+      console.log('Movimiento de actualización registrado:', movement.movementId)
     } catch (err) {
-      console.error('❌ Error registrando actualización:', err)
+      console.error('Error registrando actualización:', err)
     }
   }
 
-  /**
-   * Registrar eliminación de producto
-   */
   const logProductDeletion = async (productData, productId) => {
     try {
       const adminUserId = await findAdminUserId()
@@ -233,15 +228,12 @@ export function useMovements() {
       }
 
       await addDoc(movementsRef, movement)
-      console.log('✅ Movimiento de eliminación registrado:', movement.movementId)
+      console.log('Movimiento de eliminación registrado:', movement.movementId)
     } catch (err) {
-      console.error('❌ Error registrando eliminación:', err)
+      console.error('Error registrando eliminación:', err)
     }
   }
 
-  /**
-   * Registrar recuento cíclico
-   */
   const logCyclicCount = async (productData, oldStock, newStock, notes = '') => {
     try {
       const adminUserId = await findAdminUserId()
@@ -285,15 +277,12 @@ export function useMovements() {
       }
 
       await addDoc(movementsRef, movement)
-      console.log('✅ Movimiento de recuento cíclico registrado:', movement.movementId)
+      console.log('Movimiento de recuento cíclico registrado:', movement.movementId)
     } catch (err) {
-      console.error('❌ Error registrando recuento cíclico:', err)
+      console.error('Error registrando recuento cíclico:', err)
     }
   }
 
-  /**
-   * Cargar movimientos (con paginación)
-   */
   const loadMovements = async (limitCount = 50, productId = null) => {
     try {
       loading.value = true
@@ -312,7 +301,6 @@ export function useMovements() {
         limit(limitCount)
       )
 
-      // Filtrar por producto si se especifica
       if (productId) {
         q = query(
           movementsRef,
@@ -332,7 +320,7 @@ export function useMovements() {
 
       return movements.value
     } catch (err) {
-      console.error('❌ Error cargando movimientos:', err)
+      console.error('Error cargando movimientos:', err)
       error.value = 'Error al cargar el historial'
       throw err
     } finally {
@@ -340,9 +328,6 @@ export function useMovements() {
     }
   }
 
-  /**
-   * Obtener estadísticas de movimientos
-   */
   const getMovementStats = computed(() => {
     const total = movements.value.length
     const byType = {

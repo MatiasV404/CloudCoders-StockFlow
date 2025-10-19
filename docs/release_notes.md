@@ -6,6 +6,7 @@
 
 **NEW: Historial de movimientos desarrollado**
 - [FEAT] En cada flujo, cambio, se integra un historial de movimientos de los productos.
+- [FEAT] Arreglos generales.
 
 **Posted on 12-10-2025**
 
