@@ -8,6 +8,44 @@
         <p class="m-0 opacity-90 text-base sm:text-lg">Gestiona tu inventario de manera eficiente</p>
       </div>
 
+      
+      <!-- Acciones rápidas -->
+      <div data-aos="fade-up" data-aos-delay="400">
+        <h3 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-4">Acciones rápidas</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          
+          <button @click="goToAddProduct"
+            class="bg-white mb-6 border-2 border-gray-200 p-4 sm:p-5 rounded-xl cursor-pointer transition-all flex items-center gap-3 font-medium text-gray-600 hover:border-blue-500 hover:text-blue-500 text-left">
+            <span class="text-xl sm:text-2xl flex-shrink-0">➕</span>
+            <div>
+              <span class="block">Agregar producto</span>
+              <span class="text-xs text-gray-400">Nuevo artículo</span>
+            </div>
+          </button>
+
+          <button @click="goToInventory"
+            class="bg-white border-2 mb-6 border-gray-200 p-4 sm:p-5 rounded-xl cursor-pointer transition-all flex items-center gap-3 font-medium text-gray-600 hover:border-blue-500 hover:text-blue-500 text-left">
+            <span class="text-xl sm:text-2xl flex-shrink-0">📋</span>
+            <div>
+              <span class="block">Ver inventario</span>
+              <span class="text-xs text-gray-400">Gestionar productos</span>
+            </div>
+          </button>
+
+          <div class="bg-gray-50 border-2 mb-6 border-gray-200 p-4 sm:p-5 rounded-xl cursor-not-allowed flex items-center gap-3 font-medium text-gray-400 text-left relative opacity-60">
+            <span class="text-xl sm:text-2xl flex-shrink-0">📈</span>
+            <div>
+              <span class="block">Generar reporte</span>
+              <span class="text-xs text-gray-300">Próximamente</span>
+            </div>
+            <div class="absolute -top-2 -right-2 bg-yellow-100 border border-yellow-300 text-yellow-700 text-xs px-2 py-1 rounded-full font-semibold">
+              Pronto
+            </div>
+          </div>
+        </div>
+      </div>
+
+
       <!-- Grid de estadísticas básicas -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8" data-aos="fade-up" data-aos-delay="100">
         
@@ -251,42 +289,6 @@
         <h3 class="text-xl font-bold text-gray-800 mb-4">🥧 Distribución de productos</h3>
         <div class="max-w-md mx-auto">
           <canvas ref="productDistribution"></canvas>
-        </div>
-      </div>
-
-      <!-- Acciones rápidas -->
-      <div data-aos="fade-up" data-aos-delay="400">
-        <h3 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-4">Acciones rápidas</h3>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          
-          <button @click="goToAddProduct"
-            class="bg-white border-2 border-gray-200 p-4 sm:p-5 rounded-xl cursor-pointer transition-all flex items-center gap-3 font-medium text-gray-600 hover:border-blue-500 hover:text-blue-500 text-left">
-            <span class="text-xl sm:text-2xl flex-shrink-0">➕</span>
-            <div>
-              <span class="block">Agregar producto</span>
-              <span class="text-xs text-gray-400">Nuevo artículo</span>
-            </div>
-          </button>
-
-          <button @click="goToInventory"
-            class="bg-white border-2 border-gray-200 p-4 sm:p-5 rounded-xl cursor-pointer transition-all flex items-center gap-3 font-medium text-gray-600 hover:border-blue-500 hover:text-blue-500 text-left">
-            <span class="text-xl sm:text-2xl flex-shrink-0">📋</span>
-            <div>
-              <span class="block">Ver inventario</span>
-              <span class="text-xs text-gray-400">Gestionar productos</span>
-            </div>
-          </button>
-
-          <div class="bg-gray-50 border-2 border-gray-200 p-4 sm:p-5 rounded-xl cursor-not-allowed flex items-center gap-3 font-medium text-gray-400 text-left relative opacity-60">
-            <span class="text-xl sm:text-2xl flex-shrink-0">📈</span>
-            <div>
-              <span class="block">Generar reporte</span>
-              <span class="text-xs text-gray-300">Próximamente</span>
-            </div>
-            <div class="absolute -top-2 -right-2 bg-yellow-100 border border-yellow-300 text-yellow-700 text-xs px-2 py-1 rounded-full font-semibold">
-              Pronto
-            </div>
-          </div>
         </div>
       </div>
 

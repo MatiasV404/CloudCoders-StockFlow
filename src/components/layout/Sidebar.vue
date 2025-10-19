@@ -62,6 +62,7 @@
           </router-link>
         </li>
 
+        <!-- Recuento Cíclico -->
         <li v-if="canManageProducts">
           <router-link to="/cyclic-count"
             class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-white no-underline hover:bg-white/10 group relative overflow-hidden"
@@ -71,18 +72,15 @@
               <path
                 d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" />
             </svg>
-
-            <div v-show="!isCollapsed || isMobile" class="flex items-center gap-2 min-w-0">
-              <span class="whitespace-nowrap">Recuento Cíclico</span>
-            </div>
-
+            <span v-show="!isCollapsed || isMobile" class="whitespace-nowrap">Recuento Cíclico</span>
             <div v-if="!isMobile && isCollapsed"
               class="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 whitespace-nowrap">
               Recuento Cíclico
             </div>
           </router-link>
+        </li>
 
-          <!-- filepath: src/components/layout/Sidebar.vue -->
+        <!-- Historial -->
         <li v-if="canViewDashboard">
           <router-link to="/movements"
             class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-white no-underline hover:bg-white/10 group relative"
@@ -93,13 +91,11 @@
                 d="M13.5,8H12V13L16.28,15.54L17,14.33L13.5,12.25V8M13,3A9,9 0 0,0 4,12H1L4.96,16.03L9,12H6A7,7 0 0,1 13,5A7,7 0 0,1 20,12A7,7 0 0,1 13,19C11.07,19 9.32,18.21 8.06,16.94L6.64,18.36C8.27,20 10.5,21 13,21A9,9 0 0,0 22,12A9,9 0 0,0 13,3" />
             </svg>
             <span v-show="!isCollapsed || isMobile" class="whitespace-nowrap">Historial</span>
-
             <div v-if="!isMobile && isCollapsed"
               class="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 whitespace-nowrap">
               Historial
             </div>
           </router-link>
-        </li>
         </li>
       </ul>
     </nav>
@@ -223,7 +219,6 @@ nav a {
 }
 
 @media (max-width: 1023px) {
-
   html,
   body {
     overflow-x: hidden;
