@@ -1,25 +1,22 @@
 <template>
-  <aside 
-    class="sidebar bg-gradient-to-br from-blue-500 to-blue-600 text-white flex flex-col transition-all duration-300 shadow-lg z-50" 
+  <aside
+    class="sidebar bg-gradient-to-br from-blue-500 to-blue-600 text-white flex flex-col transition-all duration-300 shadow-lg z-50"
     :class="[
       isMobile ? 'sidebar-mobile' : 'sidebar-desktop',
       { 'sidebar-collapsed': isCollapsed }
-    ]"
-  >
-    
+    ]">
+
     <!-- Header del sidebar -->
     <div class="p-5 flex items-center justify-between border-b border-white/10">
       <div class="flex items-center gap-3">
         <div class="text-3xl w-8 flex-shrink-0" v-if="!isCollapsed">📦</div>
-        <span v-show="!isCollapsed" class="text-xl font-semibold whitespace-nowrap transition-opacity duration-300">StockFlow</span>
+        <span v-show="!isCollapsed"
+          class="text-xl font-semibold whitespace-nowrap transition-opacity duration-300">StockFlow</span>
       </div>
-      
-      <button 
-        v-if="!isMobile || !isCollapsed"
-        @click="handleToggle" 
-        class="text-white hover:bg-white/10 p-2 rounded-lg transition-colors" 
-        :title="isCollapsed ? 'Expandir menú' : 'Contraer menú'"
-      >
+
+      <button v-if="!isMobile || !isCollapsed" @click="handleToggle"
+        class="text-white hover:bg-white/10 p-2 rounded-lg transition-colors"
+        :title="isCollapsed ? 'Expandir menú' : 'Contraer menú'">
         <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
           <path v-if="isCollapsed" d="M10,17L15,12L10,7V17Z" />
           <path v-else d="M15,17L10,12L15,7V17Z" />
@@ -32,18 +29,16 @@
       <ul class="space-y-2 px-3">
         <!-- Dashboard (solo admin) -->
         <li v-if="canViewDashboard">
-          <router-link 
-            to="/dashboard" 
+          <router-link to="/dashboard"
             class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-white no-underline hover:bg-white/10 group relative"
-            :class="{ 'justify-center': !isMobile && isCollapsed }"
-            @click="handleLinkClick"
-            active-class="bg-white/20 font-semibold"
-          >
+            :class="{ 'justify-center': !isMobile && isCollapsed }" @click="handleLinkClick"
+            active-class="bg-white/20 font-semibold">
             <svg class="w-6 h-6 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
               <path d="M13,3V9H21V3M13,21H21V11H13M3,21H11V15H3M3,13H11V3H3V13Z" />
             </svg>
             <span v-show="!isCollapsed || isMobile" class="whitespace-nowrap">Dashboard</span>
-            <div v-if="!isMobile && isCollapsed" class="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 whitespace-nowrap">
+            <div v-if="!isMobile && isCollapsed"
+              class="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 whitespace-nowrap">
               Dashboard
             </div>
           </router-link>
@@ -51,43 +46,60 @@
 
         <!-- Inventario -->
         <li v-if="canManageProducts">
-          <router-link 
-            to="/inventory" 
+          <router-link to="/inventory"
             class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-white no-underline hover:bg-white/10 group relative"
-            :class="{ 'justify-center': !isMobile && isCollapsed }"
-            @click="handleLinkClick"
-            active-class="bg-white/20 font-semibold"
-          >
+            :class="{ 'justify-center': !isMobile && isCollapsed }" @click="handleLinkClick"
+            active-class="bg-white/20 font-semibold">
             <svg class="w-6 h-6 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M19,20H4C2.89,20 2,19.1 2,18V6C2,4.89 2.89,4 4,4H10L12,6H19A2,2 0 0,1 21,8H21L4,8V18L6.14,10H23.21L20.93,18.5C20.7,19.37 19.92,20 19,20Z" />
+              <path
+                d="M19,20H4C2.89,20 2,19.1 2,18V6C2,4.89 2.89,4 4,4H10L12,6H19A2,2 0 0,1 21,8H21L4,8V18L6.14,10H23.21L20.93,18.5C20.7,19.37 19.92,20 19,20Z" />
             </svg>
             <span v-show="!isCollapsed || isMobile" class="whitespace-nowrap">Inventario</span>
-            <div v-if="!isMobile && isCollapsed" class="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 whitespace-nowrap">
+            <div v-if="!isMobile && isCollapsed"
+              class="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 whitespace-nowrap">
               Inventario
             </div>
           </router-link>
         </li>
 
         <li v-if="canManageProducts">
-          <router-link 
-            to="/cyclic-count" 
+          <router-link to="/cyclic-count"
             class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-white no-underline hover:bg-white/10 group relative overflow-hidden"
-            :class="{ 'justify-center': !isMobile && isCollapsed }"
-            @click="handleLinkClick"
-            active-class="bg-white/20 font-semibold"
-          >
+            :class="{ 'justify-center': !isMobile && isCollapsed }" @click="handleLinkClick"
+            active-class="bg-white/20 font-semibold">
             <svg class="w-6 h-6 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" />
+              <path
+                d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" />
             </svg>
-            
+
             <div v-show="!isCollapsed || isMobile" class="flex items-center gap-2 min-w-0">
               <span class="whitespace-nowrap">Recuento Cíclico</span>
             </div>
-            
-            <div v-if="!isMobile && isCollapsed" class="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 whitespace-nowrap">
+
+            <div v-if="!isMobile && isCollapsed"
+              class="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 whitespace-nowrap">
               Recuento Cíclico
             </div>
           </router-link>
+
+          <!-- filepath: src/components/layout/Sidebar.vue -->
+        <li v-if="canViewDashboard">
+          <router-link to="/movements"
+            class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-white no-underline hover:bg-white/10 group relative"
+            :class="{ 'justify-center': !isMobile && isCollapsed }" @click="handleLinkClick"
+            active-class="bg-white/20 font-semibold">
+            <svg class="w-6 h-6 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M13.5,8H12V13L16.28,15.54L17,14.33L13.5,12.25V8M13,3A9,9 0 0,0 4,12H1L4.96,16.03L9,12H6A7,7 0 0,1 13,5A7,7 0 0,1 20,12A7,7 0 0,1 13,19C11.07,19 9.32,18.21 8.06,16.94L6.64,18.36C8.27,20 10.5,21 13,21A9,9 0 0,0 22,12A9,9 0 0,0 13,3" />
+            </svg>
+            <span v-show="!isCollapsed || isMobile" class="whitespace-nowrap">Historial</span>
+
+            <div v-if="!isMobile && isCollapsed"
+              class="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 whitespace-nowrap">
+              Historial
+            </div>
+          </router-link>
+        </li>
         </li>
       </ul>
     </nav>
@@ -96,14 +108,14 @@
     <div class="p-5 border-t border-white/10">
       <!-- Badge de rol -->
       <div v-show="!isCollapsed || isMobile" class="mb-3">
-        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium"
-          :class="roleClass">
+        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium" :class="roleClass">
           {{ roleLabel }}
         </span>
       </div>
-      
+
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center font-semibold text-lg flex-shrink-0">
+        <div
+          class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center font-semibold text-lg flex-shrink-0">
           {{ userInitials }}
         </div>
         <div v-show="!isCollapsed || isMobile" class="overflow-hidden transition-opacity duration-300">
@@ -122,7 +134,7 @@ import { useAuth } from '../../composables/useAuth.js'
 const { user, userProfile, permissions } = useAuth()
 
 const isCollapsed = inject('sidebarCollapsed', ref(false))
-const toggleSidebar = inject('toggleSidebar', () => {})
+const toggleSidebar = inject('toggleSidebar', () => { })
 const isMobile = inject('isMobile', ref(false))
 
 const handleToggle = () => {
@@ -211,7 +223,9 @@ nav a {
 }
 
 @media (max-width: 1023px) {
-  html, body {
+
+  html,
+  body {
     overflow-x: hidden;
   }
 }

@@ -255,9 +255,11 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import DashboardLayout from '../../components/layout/DashboardLayout.vue'
 import Toast from '../../components/common/Toast.vue'
 import { useProducts } from '../../composables/useProducts.js'
+import { useMovements } from '../../composables/useMovements.js'
 import { BrowserQRCodeReader } from '@zxing/library'
 
 const { products, loadProducts, updateProduct } = useProducts()
+const { logCyclicCount } = useMovements()
 
 // Estado del escáner
 const isScanning = ref(false)

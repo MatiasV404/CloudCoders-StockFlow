@@ -1,5 +1,14 @@
 # 📋 Notas de Versión - StockFlow
 
+## v1.4.0 - Integración de historial de movimientos.
+
+**Posted on 19-10-2025**
+
+**NEW: Historial de movimientos desarrollado**
+- [FEAT] En cada flujo, cambio, se integra un historial de movimientos de los productos.
+
+**Posted on 12-10-2025**
+
 ## v1.3.1 - Restricción de acciones para roles operarios.
 
 **Posted on 12-10-2025**
