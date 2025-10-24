@@ -488,6 +488,15 @@ const updatePhysicalCount = async () => {
   updating.value = true
   
   try {
+    const oldStock = currentProduct.value.stock
+    
+    await logCyclicCount(
+      currentProduct.value,
+      oldStock,
+      physicalCount.value,
+      countNotes.value
+    )
+    
     await updateProduct(currentProduct.value.id, {
       ...currentProduct.value,
       stock: physicalCount.value
@@ -496,6 +505,7 @@ const updatePhysicalCount = async () => {
     showSuccessToast.value = true
     clearProduct()
   } catch (error) {
+    console.error('Error en conteo cíclico:', error)
     errorMessage.value = 'No se pudo actualizar el stock'
     showErrorToast.value = true
   } finally {

@@ -9,6 +9,7 @@
 - [FEAT] Se aplica márgen izquierdo al contenido principal en vista de escritorio para que el sidebar no suprima el contenido.
 - [FIX] Se cambia "Recuento" por "Conteo".
 - [FIX] Se elimina columna flotante en inventario.
+- [FEAT] Los comentarios de conteo cíclico se almacenan en los historiales de movimientos.
 
 ## v1.4.0 - Integración de historial de movimientos.
 
