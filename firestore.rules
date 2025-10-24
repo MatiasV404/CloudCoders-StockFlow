@@ -14,30 +14,43 @@ service cloud.firestore {
     
     // Colección de usuarios
     match /users/{userId} {
-      // Cualquier usuario autenticado puede leer perfiles (necesario para verificar códigos)
       allow read: if request.auth != null;
-      
-      // Solo el dueño puede modificar su perfil
       allow write: if request.auth != null && request.auth.uid == userId;
     }
     
+    // PRODUCTOS
     match /users/{userId}/products/{productId} {
-      // Permitir lectura si:
-      // 1. Es el dueño de los productos O
-      // 2. Comparte el mismo projectCode
+      // Lectura: Admin dueño O usuario con mismo projectCode
       allow read: if request.auth != null && (
         request.auth.uid == userId ||
         getUserProjectCode() == getOwnerProjectCode(userId)
       );
       
-      // Permitir escritura si:
-      // 1. Es el dueño O
-      // 2. Comparte projectCode Y tiene permisos de manageProducts
+      // Escritura: Admin dueño O usuario con permisos
       allow write: if request.auth != null && (
         request.auth.uid == userId ||
         (getUserProjectCode() == getOwnerProjectCode(userId) &&
          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.permissions.manageProducts == true)
       );
+    }
+    
+    // - Subcollection
+    match /users/{userId}/movements/{movementId} {
+      // Lectura: Admin dueño O usuario con mismo projectCode
+      allow read: if request.auth != null && (
+        request.auth.uid == userId ||
+        getUserProjectCode() == getOwnerProjectCode(userId)
+      );
+      
+      // Escritura: Solo crear (CREATE)
+      // Admin dueño O usuario con mismo projectCode
+      allow create: if request.auth != null && (
+        request.auth.uid == userId ||
+        getUserProjectCode() == getOwnerProjectCode(userId)
+      );
+      
+      // AUDITORÍA INMUTABLE: NUNCA permitir editar o eliminar
+      allow update, delete: if false;
     }
   }
 }

@@ -11,7 +11,6 @@
 </template>
 
 <script setup>
-import { watch } from 'vue'
 import { useAuth } from './composables/useAuth.js'
 
 const { authInitialized } = useAuth()
