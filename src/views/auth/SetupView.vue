@@ -87,11 +87,11 @@
                 Operario
               </h3>
               <p class="text-sm text-gray-600 mb-3">
-                Miembro del equipo. Gestiona productos y realiza recuento de inventario.
+                Miembro del equipo. Gestiona productos y realiza conteo de inventario.
               </p>
               <div class="flex flex-wrap gap-2">
                 <span class="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">✓ Inventario</span>
-                <span class="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">✓ Recuento</span>
+                <span class="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">✓ Conteo</span>
                 <span class="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">✓ Escaneo</span>
               </div>
             </div>

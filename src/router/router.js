@@ -43,7 +43,7 @@ const routes = [
     component: () => import("../views/movements/MovementsView.vue"),
     meta: { requiresAuth: true },
   },
-  // Recuento Cíclico
+  // Conteo Cíclico
   {
     path: "/cyclic-count",
     name: "CyclicCount",

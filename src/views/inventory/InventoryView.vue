@@ -197,8 +197,6 @@
                 <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider"
                   v-if="userRole === 'admin'">Acciones</th>
                 <th class="px-6 py-4 text-center text-sm font-medium text-gray-500 uppercase tracking-wider">QR</th>
-                <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider"
-                  v-if="userRole === 'admin'">Acciones</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">

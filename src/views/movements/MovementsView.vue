@@ -45,7 +45,7 @@
           <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-purple-500">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-gray-600">Recuentos</p>
+                <p class="text-sm text-gray-600">Conteos</p>
                 <p class="text-2xl font-bold text-gray-800">{{ movementStats.byType.CYCLE_COUNT }}</p>
               </div>
               <div class="text-purple-500 text-2xl">📸</div>
@@ -62,7 +62,7 @@
             <option value="CREATE">Creaciones</option>
             <option value="UPDATE">Actualizaciones</option>
             <option value="DELETE">Eliminaciones</option>
-            <option value="CYCLE_COUNT">Recuentos Cíclicos</option>
+            <option value="CYCLE_COUNT">Conteos Cíclicos</option>
           </select>
 
           <select v-model="limitCount" @change="reloadMovements" class="px-4 py-2 border border-gray-300 rounded-lg">
@@ -161,7 +161,7 @@
           </div>
 
           <div v-else-if="movement.type === 'CYCLE_COUNT'" class="bg-purple-50 border border-purple-200 rounded-lg p-4">
-            <h4 class="text-sm font-semibold text-purple-800 mb-2">Recuento realizado:</h4>
+            <h4 class="text-sm font-semibold text-purple-800 mb-2">Conteo realizado:</h4>
             <div class="space-y-2">
               <div class="flex items-center gap-2 text-xs">
                 <span class="font-medium">Stock anterior:</span>
@@ -270,7 +270,7 @@ const getTypeLabel = (type) => {
     CREATE: 'Creación',
     UPDATE: 'Actualización',
     DELETE: 'Eliminación',
-    CYCLE_COUNT: 'Recuento Cíclico'
+    CYCLE_COUNT: 'Conteo Cíclico'
   }
   return labels[type] || type
 }

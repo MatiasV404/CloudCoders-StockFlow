@@ -265,10 +265,10 @@ export function useMovements() {
           notes: notes || 'Sin observaciones'
         },
         metadata: {
-          action: 'Recuento cíclico',
+          action: 'Conteo cíclico',
           description: difference === 0 
-            ? `Recuento del producto "${productData.name}". Stock coincide: ${newStock} unidades`
-            : `Recuento del producto "${productData.name}". ${difference > 0 ? 'Excedente' : 'Faltante'} de ${Math.abs(difference)} unidades (${oldStock} → ${newStock})`,
+            ? `Conteo del producto "${productData.name}". Stock coincide: ${newStock} unidades`
+            : `Conteo del producto "${productData.name}". ${difference > 0 ? 'Excedente' : 'Faltante'} de ${Math.abs(difference)} unidades (${oldStock} → ${newStock})`,
           firestoreDocId: productData.id,
           notes: notes,
           difference: difference,
@@ -277,9 +277,9 @@ export function useMovements() {
       }
 
       await addDoc(movementsRef, movement)
-      console.log('Movimiento de recuento cíclico registrado:', movement.movementId)
+      console.log('Movimiento de conteo cíclico registrado:', movement.movementId)
     } catch (err) {
-      console.error('Error registrando recuento cíclico:', err)
+      console.error('Error registrando conteo cíclico:', err)
     }
   }
 

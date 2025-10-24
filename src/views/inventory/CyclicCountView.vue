@@ -9,7 +9,7 @@
             <svg class="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
               <path d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" />
             </svg>
-            <h2 class="text-2xl font-bold m-0">Recuento Cíclico</h2>
+            <h2 class="text-2xl font-bold m-0">Conteo Cíclico</h2>
           </div>
           <p class="opacity-90 m-0">Escanea códigos QR para registrar el stock físico de productos</p>
         </div>
@@ -150,7 +150,7 @@
             </button>
           </div>
 
-          <!-- Formulario de recuento -->
+          <!-- Formulario de conteo -->
           <form @submit.prevent="updatePhysicalCount" class="space-y-4">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -190,7 +190,7 @@
               <textarea
                 v-model="countNotes"
                 rows="2"
-                placeholder="Agrega cualquier observación sobre el recuento..."
+                placeholder="Agrega cualquier observación sobre el conteo..."
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
               ></textarea>
             </div>
@@ -212,7 +212,7 @@
                   <path d="M12,1A11,11 0 1 0 23,12A11,11 0 0 0 12,1Zm0,19a8,8 0 1 1 8-8A8,8 0 0 1 12,20Z" opacity=".25"/>
                   <path d="M10.14,1.16a11,11 0 0 0-9,8.92A1.59,1.59 0 0,0 2.46,12,1.52,1.52 0 0,0 4.11,10.7a8,8 0 0 1 6.66-6.61A1.42,1.42 0 0,0 12,2.69h0A1.57,1.57 0 0,0 10.14,1.16Z"/>
                 </svg>
-                {{ updating ? 'Actualizando...' : 'Registrar Recuento' }}
+                {{ updating ? 'Actualizando...' : 'Registrar Conteo' }}
               </button>
             </div>
           </form>
@@ -223,7 +223,7 @@
       <Toast
         :show="showSuccessToast"
         type="success"
-        title="¡Recuento registrado!"
+        title="¡Conteo registrado!"
         message="El stock del producto se actualizó correctamente"
         :duration="3000"
         @close="showSuccessToast = false"

@@ -61,7 +61,7 @@
           </router-link>
         </li>
 
-        <!-- Recuento Cíclico -->
+        <!-- Conteo Cíclico -->
         <li v-if="canManageProducts">
           <router-link to="/cyclic-count"
             class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-white no-underline hover:bg-white/10 group relative overflow-hidden"
@@ -71,10 +71,10 @@
               <path
                 d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" />
             </svg>
-            <span v-show="!isCollapsed || isMobile" class="whitespace-nowrap">Recuento Cíclico</span>
+            <span v-show="!isCollapsed || isMobile" class="whitespace-nowrap">Conteo Cíclico</span>
             <div v-if="!isMobile && isCollapsed"
               class="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 whitespace-nowrap">
-              Recuento Cíclico
+              Conteo Cíclico
             </div>
           </router-link>
         </li>
@@ -235,11 +235,14 @@ const copyProjectCode = async () => {
 <style scoped>
 /* Estilos para desktop */
 .sidebar-desktop {
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 280px;
-  min-height: 100vh;
-  position: relative;
+  height: 100vh;
   transition: width 0.3s ease;
   overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .sidebar-desktop.sidebar-collapsed {
@@ -272,7 +275,6 @@ nav a {
 }
 
 @media (max-width: 1023px) {
-
   html,
   body {
     overflow-x: hidden;
