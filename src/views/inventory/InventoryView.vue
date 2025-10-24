@@ -94,7 +94,7 @@
             </div>
 
             <!-- Botón agregar -->
-            <button @click="showAddModal = true"
+            <button @click="showAddModal = true" v-if="userRole === 'admin'"
               class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 whitespace-nowrap sm:w-auto">
               <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" />
@@ -104,7 +104,7 @@
             </button>
           </div>
 
-          <!-- Indicadores de filtros activos (opcional) -->
+          <!-- Indicadores de filtros activos -->
           <div v-if="searchTerm || selectedCategory || selectedStatus" class="flex flex-wrap gap-2">
             <span v-if="searchTerm"
               class="inline-flex items-center gap-1 bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
@@ -139,7 +139,6 @@
               </button>
             </span>
 
-            <!-- Botón limpiar todo -->
             <button @click="clearAllFilters"
               class="inline-flex items-center gap-1 bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-xs hover:bg-gray-200 transition-colors">
               <svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
@@ -152,9 +151,30 @@
         </div>
       </div>
 
-      <!-- Loading -->
-      <div v-if="loading" class="flex justify-center py-8">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <!-- LOADING MEJORADO -->
+      <div v-if="loading" class="flex flex-col items-center justify-center py-16">
+        <div class="relative">
+          <!-- Spinner animado -->
+          <div class="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+
+          <!-- Icono central -->
+          <div class="absolute inset-0 flex items-center justify-center">
+            <svg class="w-6 h-6 text-blue-600 animate-pulse" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V19A2,2 0 0,1 20,21H4A2,2 0 0,1 2,19V6A2,2 0 0,1 4,4Z" />
+            </svg>
+          </div>
+        </div>
+
+        <!-- Texto de carga -->
+        <div class="mt-6 text-center">
+          <p class="text-lg font-medium text-gray-700 mb-1">Cargando inventario...</p>
+          <p class="text-sm text-gray-500">Esto puede tomar unos segundos</p>
+        </div>
+
+        <!-- Barra de progreso animada -->
+        <div class="mt-4 w-48 h-1 bg-gray-200 rounded-full overflow-hidden">
+          <div class="h-full bg-blue-600 rounded-full animate-pulse" style="width: 60%"></div>
+        </div>
       </div>
 
       <!-- Tabla de productos -->
@@ -163,7 +183,9 @@
           <table class="w-full">
             <thead class="bg-gray-50">
               <tr>
-                <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">#</th>
+                <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Product ID
+                </th>
                 <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Código/SKU
                 </th>
                 <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
@@ -172,12 +194,16 @@
                 <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Stock</th>
                 <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Precio</th>
                 <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider"
+                  v-if="userRole === 'admin'">Acciones</th>
+                <th class="px-6 py-4 text-center text-sm font-medium text-gray-500 uppercase tracking-wider">QR</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
+              <!-- Estado vacío -->
               <tr v-if="filteredProducts.length === 0">
-                <td colspan="8" class="px-6 py-8 text-center text-gray-500">
+                <td colspan="10" class="px-6 py-8 text-center text-gray-500">
+                  <!-- ↑ CAMBIAR de colspan="9" a colspan="10" -->
                   <div class="flex flex-col items-center gap-2">
                     <svg class="w-12 h-12 text-gray-300" viewBox="0 0 24 24" fill="currentColor">
                       <path
@@ -188,24 +214,44 @@
                   </div>
                 </td>
               </tr>
+
+              <!-- Filas de productos -->
               <tr v-for="(product, index) in filteredProducts" :key="product.id" class="hover:bg-gray-50">
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
                   {{ index + 1 }}
                 </td>
+
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm font-medium text-gray-900">{{ product.code || product.sku }}</div>
+                  <span
+                    class="inline-flex items-center gap-1 px-2 py-1 bg-indigo-100 text-indigo-800 rounded-full text-xs font-mono font-semibold">
+                    <svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
+                      <path
+                        d="M3,11H5V13H3V11M11,5H13V9H11V5M9,11H13V15H11V13H9V11M15,11H17V13H19V11H21V13H19V15H21V19H19V21H17V19H13V21H11V17H15V15H17V13H15V11M19,19V15H17V19H19M15,3H21V9H15V3M17,5V7H19V5H17M3,3H9V9H3V3M5,5V7H7V5H5M3,15H9V21H3V15M5,17V19H7V17H5Z" />
+                    </svg>
+                    {{ product.productId || 'N/A' }}
+                  </span>
                 </td>
+
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm font-medium text-gray-900">
+                    {{ product.code || product.sku || 'N/A' }}
+                  </div>
+                </td>
+
                 <td class="px-6 py-4">
                   <div class="text-sm font-medium text-gray-900">{{ product.name }}</div>
-                  <div v-if="product.description" class="text-sm text-gray-500 max-w-xs truncate">{{ product.description
-                    }}</div>
+                  <div v-if="product.description" class="text-sm text-gray-500 max-w-xs truncate">
+                    {{ product.description }}
+                  </div>
                 </td>
+
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span
                     class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                     {{ product.category }}
                   </span>
                 </td>
+
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
                     <span class="text-sm font-medium text-gray-900">{{ product.stock }}</span>
@@ -216,25 +262,60 @@
                     </span>
                   </div>
                 </td>
+
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   ${{ formatCurrency(product.price) }}
                 </td>
+
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
                     :class="getStatusClass(product.status)">
                     {{ product.status }}
                   </span>
                 </td>
+
+                <td class="px-6 py-4 whitespace-nowrap text-center">
+                  <button @click="openQRModal(product)"
+                    class="group relative inline-flex items-center justify-center p-2 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-110 shadow-md hover:shadow-lg"
+                    :title="`Ver QR de ${product.name}`">
+                    <!-- Icono QR -->
+                    <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
+                      <path
+                        d="M3,11H5V13H3V11M11,5H13V9H11V5M9,11H13V15H11V13H9V11M15,11H17V13H19V11H21V13H19V15H21V19H19V21H17V19H13V21H11V17H15V15H17V13H15V11M19,19V15H17V19H19M15,3H21V9H15V3M17,5V7H19V5H17M3,3H9V9H3V3M5,5V7H7V5H5M3,15H9V21H3V15M5,17V19H7V17H5Z" />
+                    </svg>
+
+                    <!-- Badge de notificación -->
+                    <span
+                      class="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-white animate-pulse"></span>
+
+                    <!-- Tooltip -->
+                    <div
+                      class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-lg">
+                      <div class="flex items-center gap-1">
+                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
+                          <path
+                            d="M3,11H5V13H3V11M11,5H13V9H11V5M9,11H13V15H11V13H9V11M15,11H17V13H19V11H21V13H19V15H21V19H19V21H17V19H13V21H11V17H15V15H17V13H15V11M19,19V15H17V19H19M15,3H21V9H15V3M17,5V7H19V5H17M3,3H9V9H3V3M5,5V7H7V5H5M3,15H9V21H3V15M5,17V19H7V17H5Z" />
+                        </svg>
+                        <span>Ver código QR</span>
+                      </div>
+                      <!-- Flecha del tooltip -->
+                      <div
+                        class="absolute top-full left-1/2 -translate-x-1/2 -mt-0.5 border-4 border-transparent border-t-gray-900">
+                      </div>
+                    </div>
+                  </button>
+                </td>
+
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div class="flex gap-2">
-                    <button @click="editProduct(product)"
+                    <button @click="editProduct(product)" v-if="userRole === 'admin'"
                       class="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50" title="Editar">
                       <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                         <path
                           d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" />
                       </svg>
                     </button>
-                    <button @click="confirmDelete(product)"
+                    <button @click="confirmDelete(product)" v-if="userRole === 'admin'"
                       class="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50" title="Eliminar">
                       <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
@@ -248,15 +329,16 @@
         </div>
       </div>
 
-      <!-- Modal Agregar/Editar -->
+      <!-- Modales -->
       <ProductModal :show="showAddModal || showEditModal" :product="selectedProduct" :categories="categories"
         :statuses="statuses" @close="closeModal" @save="handleSave" />
 
-      <!-- Modal Confirmación Eliminar -->
       <ConfirmModal :show="showDeleteModal" :title="`¿Eliminar ${productToDelete?.name}?`"
         :message="'Esta acción no se puede deshacer.'" :confirmText="'Eliminar'"
         :confirmClass="'bg-red-600 hover:bg-red-700'" @confirm="handleDelete" @cancel="showDeleteModal = false" />
     </div>
+    <ProductQRCode :show="showQRModal" :product-id="selectedProductForQR?.productId || ''"
+      :product-name="selectedProductForQR?.name || ''" @close="closeQRModal" />
   </DashboardLayout>
 </template>
 
@@ -266,7 +348,11 @@ import { useRoute } from 'vue-router'
 import DashboardLayout from '../../components/layout/DashboardLayout.vue'
 import ProductModal from '../../components/inventory/ProductModal.vue'
 import ConfirmModal from '../../components/common/ConfirmModal.vue'
+import ProductQRCode from '../../components/inventory/ProductQRCode.vue'
 import { useProducts } from '../../composables/useProducts.js'
+import { useAuth } from '../../composables/useAuth.js'
+
+const { user, userRole } = useAuth()
 
 const route = useRoute()
 
@@ -281,11 +367,8 @@ const {
   addProduct,
   updateProduct,
   deleteProduct,
-  searchProducts,
-  filterByCategory,
-  filterByStatus
+  searchProducts
 } = useProducts()
-
 
 // Estado local
 const searchTerm = ref('')
@@ -296,32 +379,48 @@ const showEditModal = ref(false)
 const showDeleteModal = ref(false)
 const selectedProduct = ref(null)
 const productToDelete = ref(null)
+const showQRModal = ref(false)
+const selectedProductForQR = ref(null)
 
 // Suscripción en tiempo real
 let unsubscribe = null
 
 onMounted(async () => {
-  await loadProducts()
-  unsubscribe = subscribeToProducts()
+  try {
+    await loadProducts()
 
-  // Verificar si viene de dashboard con query param para agregar
-  if (route.query.action === 'add') {
-    showAddModal.value = true
+    const subscription = await subscribeToProducts()
+    if (subscription && typeof subscription === 'function') {
+      unsubscribe = subscription
+    } else {
+      console.warn('⚠️ No se pudo establecer suscripción en tiempo real')
+    }
+
+    if (route.query.action === 'add') {
+      showAddModal.value = true
+    }
+  } catch (error) {
+    console.error('❌ Error cargando productos en inventory:', error)
   }
 })
 
 onUnmounted(() => {
-  if (unsubscribe) unsubscribe()
+  if (unsubscribe && typeof unsubscribe === 'function') {
+    try {
+      unsubscribe()
+    } catch (error) {
+      console.error('❌ Error limpiando suscripción:', error)
+    }
+  }
+  unsubscribe = null
 })
 
-// Watcher para query params
 watch(() => route.query.action, (action) => {
   if (action === 'add') {
     showAddModal.value = true
   }
 })
 
-// Productos filtrados
 const filteredProducts = computed(() => {
   let result = products.value
 
@@ -340,12 +439,10 @@ const filteredProducts = computed(() => {
   return result
 })
 
-// Funciones de utilidad
 const formatCurrency = (amount) => {
   return new Intl.NumberFormat('es-CL').format(amount)
 }
 
-// Función para limpiar todos los filtros
 const clearAllFilters = () => {
   searchTerm.value = ''
   selectedCategory.value = ''
@@ -363,7 +460,6 @@ const getStatusClass = (status) => {
   return classes[status] || 'bg-gray-100 text-gray-800'
 }
 
-// Funciones de modal
 const closeModal = () => {
   showAddModal.value = false
   showEditModal.value = false
@@ -380,14 +476,11 @@ const confirmDelete = (product) => {
   showDeleteModal.value = true
 }
 
-// Funciones CRUD
 const handleSave = async (productData) => {
   try {
     if (selectedProduct.value?.id) {
-      // Editar
       await updateProduct(selectedProduct.value.id, productData)
     } else {
-      // Agregar
       await addProduct(productData)
     }
     closeModal()
@@ -406,5 +499,15 @@ const handleDelete = async () => {
   } catch (error) {
     console.error('Error eliminando producto:', error)
   }
+}
+
+const openQRModal = (product) => {
+  selectedProductForQR.value = product
+  showQRModal.value = true
+}
+
+const closeQRModal = () => {
+  showQRModal.value = false
+  selectedProductForQR.value = null
 }
 </script>
