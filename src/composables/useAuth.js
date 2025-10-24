@@ -11,8 +11,6 @@ import {
   getDoc, 
   setDoc,
   collection,
-  query,
-  where,
   getDocs
 } from 'firebase/firestore'
 import { auth, googleProvider, db } from '../firebase/firebase.js'
@@ -38,6 +36,16 @@ export function useAuth() {
     return (timestamp.substring(timestamp.length - 4) + random).toUpperCase()
   }
 
+  const normalizeCode = (code) => {
+    if (!code) return ''
+    
+    return code
+      .trim()
+      .toUpperCase()
+      .replace(/^PRD-?/i, '')
+      .replace(/[^A-Z0-9]/g, '')
+  }
+
   const loadUserProfile = async (uid) => {
     try {
       const userDoc = await getDoc(doc(db, 'users', uid))
@@ -52,7 +60,6 @@ export function useAuth() {
     }
   }
 
-  // ✅ CORREGIDO: Solo actualizar estado, NO navegar desde aquí
   onAuthStateChanged(auth, async (firebaseUser) => {
     user.value = firebaseUser
     
@@ -86,7 +93,7 @@ export function useAuth() {
       
       return result
     } catch (err) {
-      console.error('❌ Error en login:', err)
+      console.error('Error en login:', err)
       error.value = getErrorMessage(err.code)
       throw err
     } finally {
@@ -103,7 +110,7 @@ export function useAuth() {
       await router.push('/setup')
       return result
     } catch (err) {
-      console.error('❌ Error en registro:', err)
+      console.error('Error en registro:', err)
       error.value = getErrorMessage(err.code)
       throw err
     } finally {
@@ -131,7 +138,7 @@ export function useAuth() {
       
       return result
     } catch (err) {
-      console.error('❌ Error con Google:', err)
+      console.error('Error con Google:', err)
       error.value = getErrorMessage(err.code)
       throw err
     } finally {
@@ -161,36 +168,55 @@ export function useAuth() {
       
       return newProfile
     } catch (err) {
-      console.error('❌ Error creando perfil:', err)
+      console.error('Error creando perfil:', err)
       throw err
     }
   }
 
   const verifyProjectCode = async (code) => {
     try {
-      const usersRef = collection(db, 'users')
-      const q = query(usersRef, where('projectCode', '==', code.toUpperCase()))
-      
-      const querySnapshot = await getDocs(q)
-      
-      if (querySnapshot.empty) {
-        return { valid: false, message: 'Código de proyecto no encontrado' }
+      if (!code || code.trim().length === 0) {
+        return { valid: false, message: 'El código no puede estar vacío' }
       }
 
-      const adminDoc = querySnapshot.docs[0]
-      const adminData = adminDoc.data()
+      const normalizedInputCode = normalizeCode(code)
 
-      if (adminData.role !== 'admin') {
-        return { valid: false, message: 'Código inválido' }
+      if (normalizedInputCode.length < 4) {
+        return { valid: false, message: 'El código debe tener al menos 4 caracteres válidos' }
+      }
+
+      const usersRef = collection(db, 'users')
+      const querySnapshot = await getDocs(usersRef)
+      
+      let matchedAdmin = null
+      
+      for (const doc of querySnapshot.docs) {
+        const userData = doc.data()
+        
+        if (userData.role === 'admin' && userData.projectCode) {
+          const normalizedStoredCode = normalizeCode(userData.projectCode)
+          
+          if (normalizedStoredCode === normalizedInputCode) {
+            matchedAdmin = {
+              id: doc.id,
+              data: userData
+            }
+            break
+          }
+        }
+      }
+      
+      if (!matchedAdmin) {
+        return { valid: false, message: 'Código de proyecto no encontrado' }
       }
 
       return { 
         valid: true, 
-        adminId: adminDoc.id,
-        adminEmail: adminData.email 
+        adminId: matchedAdmin.id,
+        adminEmail: matchedAdmin.data.email 
       }
     } catch (err) {
-      console.error('❌ Error verificando código:', err)
+      console.error('Error verificando código:', err)
       return { valid: false, message: 'Error al verificar código: ' + err.message }
     }
   }
@@ -205,7 +231,7 @@ export function useAuth() {
       await router.push('/login')
       window.location.reload()
     } catch (err) {
-      console.error('❌ Error cerrando sesión:', err)
+      console.error('Error cerrando sesión:', err)
       error.value = getErrorMessage(err.code)
       
       await router.push('/login')

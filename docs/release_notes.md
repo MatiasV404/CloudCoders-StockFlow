@@ -1,11 +1,42 @@
 # 📋 Notas de Versión - StockFlow
 
-## v1.3.0 - Integración de recuento cíclico
+## v1.4.1 - Integración de historial de movimientos.
+
+**Posted on 23-10-2025**
+
+**FIX: Arreglos UI**
+- [FEAT] Sidebar se encuentra con posición fixed, para mantener el 100vh.
+- [FEAT] Se aplica márgen izquierdo al contenido principal en vista de escritorio para que el sidebar no suprima el contenido.
+- [FIX] Se cambia "Recuento" por "Conteo".
+- [FIX] Se elimina columna flotante en inventario.
+- [FEAT] Los comentarios de conteo cíclico se almacenan en los historiales de movimientos.
+
+## v1.4.0 - Integración de historial de movimientos.
+
+**Posted on 19-10-2025**
+
+**NEW: Historial de movimientos desarrollado**
+- [FEAT] En cada flujo, cambio, se integra un historial de movimientos de los productos.
+- [FEAT] Arreglos generales.
+
+**Posted on 12-10-2025**
+
+## v1.3.1 - Restricción de acciones para roles operarios.
+
+**Posted on 12-10-2025**
+
+**NEW: Incorporación de condicional en vista de inventario**
+- [FEAT] Se integra verificación de rold eusuario, donde las acciones de agregar producto, editarlo o modificarlo se restringen solo para usuarios administradores.
+
+**REFACTORING: DashboardView.vue - Nuevas métricas estratégicas**
+- [FEAT] Se integran nuevos gráficos para apoyar decisiones estratégicas del administrador. Se condiciona esta vista solo para administradores.
+
+## v1.3.0 - Integración de conteo cíclico
 
 **Posted on 05-10-2025**
 
 **NEW: Incorporación de cámara para escanear QRs**
-- [FEAT] Nueva vista CyclicCountView.vue con acceso a usuarios con rol de administración u operario. Cuenta con acceso a cámara del dispositivo o ingreso manual del ID del producto para realizar un recuento del stock físico del producto.
+- [FEAT] Nueva vista CyclicCountView.vue con acceso a usuarios con rol de administración u operario. Cuenta con acceso a cámara del dispositivo o ingreso manual del ID del producto para realizar un conteo del stock físico del producto.
 
 ## v1.2.1 - Alertas migradas a modales personalizados
 

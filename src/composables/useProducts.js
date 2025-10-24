@@ -14,9 +14,15 @@ import {
 } from 'firebase/firestore'
 import { db } from '../firebase/firebase.js'
 import { useAuth } from './useAuth.js'
+import { useMovements } from './useMovements.js' // ✅ IMPORTAR
 
 export function useProducts() {
   const { user, userProfile } = useAuth()
+  const { 
+    logProductCreation, 
+    logProductUpdate, 
+    logProductDeletion 
+  } = useMovements()
   
   const products = ref([])
   const loading = ref(false)
@@ -196,6 +202,9 @@ export function useProducts() {
       }
 
       const docRef = await addDoc(productsRef, newProduct)
+      
+      await logProductCreation(newProduct, docRef.id)
+      
       return docRef.id
       
     } catch (err) {
@@ -207,7 +216,6 @@ export function useProducts() {
     }
   }
 
-  // Actualizar producto
   const updateProduct = async (productId, productData) => {
     if (!user.value?.uid) {
       throw new Error('Usuario no autenticado')
@@ -220,11 +228,19 @@ export function useProducts() {
       const productsRef = await getProductsCollection()
       const productRef = doc(productsRef, productId)
 
-      await updateDoc(productRef, {
+      const oldProductSnap = await getDoc(productRef)
+      const oldProduct = oldProductSnap.data()
+
+      const updatedData = {
         ...productData,
         updatedAt: new Date(),
         updatedBy: user.value.uid
-      })
+      }
+
+      await updateDoc(productRef, updatedData)
+      
+      const newProduct = { ...oldProduct, ...updatedData }
+      await logProductUpdate(oldProduct, newProduct, productId)
       
     } catch (err) {
       console.error('Error actualizando producto:', err)
@@ -235,7 +251,6 @@ export function useProducts() {
     }
   }
 
-  // Eliminar producto
   const deleteProduct = async (productId) => {
     if (!user.value?.uid) {
       throw new Error('Usuario no autenticado')
@@ -248,7 +263,12 @@ export function useProducts() {
       const productsRef = await getProductsCollection()
       const productRef = doc(productsRef, productId)
 
+      const productSnap = await getDoc(productRef)
+      const productData = productSnap.data()
+
       await deleteDoc(productRef)
+      
+      await logProductDeletion(productData, productId)
       
     } catch (err) {
       console.error('Error eliminando producto:', err)

@@ -94,7 +94,7 @@
             </div>
 
             <!-- Botón agregar -->
-            <button @click="showAddModal = true"
+            <button @click="showAddModal = true" v-if="userRole === 'admin'"
               class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 whitespace-nowrap sm:w-auto">
               <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" />
@@ -156,7 +156,7 @@
         <div class="relative">
           <!-- Spinner animado -->
           <div class="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-          
+
           <!-- Icono central -->
           <div class="absolute inset-0 flex items-center justify-center">
             <svg class="w-6 h-6 text-blue-600 animate-pulse" viewBox="0 0 24 24" fill="currentColor">
@@ -164,7 +164,7 @@
             </svg>
           </div>
         </div>
-        
+
         <!-- Texto de carga -->
         <div class="mt-6 text-center">
           <p class="text-lg font-medium text-gray-700 mb-1">Cargando inventario...</p>
@@ -184,20 +184,26 @@
             <thead class="bg-gray-50">
               <tr>
                 <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">#</th>
-                <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Product ID</th>
-                <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Código/SKU</th>
+                <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Product ID
+                </th>
+                <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Código/SKU
+                </th>
                 <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-                <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
+                <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Categoría
+                </th>
                 <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Stock</th>
                 <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Precio</th>
                 <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider"
+                  v-if="userRole === 'admin'">Acciones</th>
+                <th class="px-6 py-4 text-center text-sm font-medium text-gray-500 uppercase tracking-wider">QR</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
               <!-- Estado vacío -->
               <tr v-if="filteredProducts.length === 0">
-                <td colspan="9" class="px-6 py-8 text-center text-gray-500">
+                <td colspan="10" class="px-6 py-8 text-center text-gray-500">
+                  <!-- ↑ CAMBIAR de colspan="9" a colspan="10" -->
                   <div class="flex flex-col items-center gap-2">
                     <svg class="w-12 h-12 text-gray-300" viewBox="0 0 24 24" fill="currentColor">
                       <path
@@ -268,20 +274,51 @@
                   </span>
                 </td>
 
+                <td class="px-6 py-4 whitespace-nowrap text-center">
+                  <button @click="openQRModal(product)"
+                    class="group relative inline-flex items-center justify-center p-2 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-110 shadow-md hover:shadow-lg"
+                    :title="`Ver QR de ${product.name}`">
+                    <!-- Icono QR -->
+                    <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
+                      <path
+                        d="M3,11H5V13H3V11M11,5H13V9H11V5M9,11H13V15H11V13H9V11M15,11H17V13H19V11H21V13H19V15H21V19H19V21H17V19H13V21H11V17H15V15H17V13H15V11M19,19V15H17V19H19M15,3H21V9H15V3M17,5V7H19V5H17M3,3H9V9H3V3M5,5V7H7V5H5M3,15H9V21H3V15M5,17V19H7V17H5Z" />
+                    </svg>
+
+                    <!-- Badge de notificación -->
+                    <span
+                      class="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-white animate-pulse"></span>
+
+                    <!-- Tooltip -->
+                    <div
+                      class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-lg">
+                      <div class="flex items-center gap-1">
+                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
+                          <path
+                            d="M3,11H5V13H3V11M11,5H13V9H11V5M9,11H13V15H11V13H9V11M15,11H17V13H19V11H21V13H19V15H21V19H19V21H17V19H13V21H11V17H15V15H17V13H15V11M19,19V15H17V19H19M15,3H21V9H15V3M17,5V7H19V5H17M3,3H9V9H3V3M5,5V7H7V5H5M3,15H9V21H3V15M5,17V19H7V17H5Z" />
+                        </svg>
+                        <span>Ver código QR</span>
+                      </div>
+                      <!-- Flecha del tooltip -->
+                      <div
+                        class="absolute top-full left-1/2 -translate-x-1/2 -mt-0.5 border-4 border-transparent border-t-gray-900">
+                      </div>
+                    </div>
+                  </button>
+                </td>
+
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div class="flex gap-2">
-                    <button @click="editProduct(product)"
+                    <button @click="editProduct(product)" v-if="userRole === 'admin'"
                       class="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50" title="Editar">
                       <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                         <path
                           d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" />
                       </svg>
                     </button>
-                    <button @click="confirmDelete(product)"
+                    <button @click="confirmDelete(product)" v-if="userRole === 'admin'"
                       class="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50" title="Eliminar">
                       <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                        <path
-                          d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
+                        <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
                       </svg>
                     </button>
                   </div>
@@ -300,6 +337,8 @@
         :message="'Esta acción no se puede deshacer.'" :confirmText="'Eliminar'"
         :confirmClass="'bg-red-600 hover:bg-red-700'" @confirm="handleDelete" @cancel="showDeleteModal = false" />
     </div>
+    <ProductQRCode :show="showQRModal" :product-id="selectedProductForQR?.productId || ''"
+      :product-name="selectedProductForQR?.name || ''" @close="closeQRModal" />
   </DashboardLayout>
 </template>
 
@@ -309,7 +348,11 @@ import { useRoute } from 'vue-router'
 import DashboardLayout from '../../components/layout/DashboardLayout.vue'
 import ProductModal from '../../components/inventory/ProductModal.vue'
 import ConfirmModal from '../../components/common/ConfirmModal.vue'
+import ProductQRCode from '../../components/inventory/ProductQRCode.vue'
 import { useProducts } from '../../composables/useProducts.js'
+import { useAuth } from '../../composables/useAuth.js'
+
+const { user, userRole } = useAuth()
 
 const route = useRoute()
 
@@ -336,6 +379,8 @@ const showEditModal = ref(false)
 const showDeleteModal = ref(false)
 const selectedProduct = ref(null)
 const productToDelete = ref(null)
+const showQRModal = ref(false)
+const selectedProductForQR = ref(null)
 
 // Suscripción en tiempo real
 let unsubscribe = null
@@ -454,5 +499,15 @@ const handleDelete = async () => {
   } catch (error) {
     console.error('Error eliminando producto:', error)
   }
+}
+
+const openQRModal = (product) => {
+  selectedProductForQR.value = product
+  showQRModal.value = true
+}
+
+const closeQRModal = () => {
+  showQRModal.value = false
+  selectedProductForQR.value = null
 }
 </script>
