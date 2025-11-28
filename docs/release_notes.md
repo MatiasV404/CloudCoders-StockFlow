@@ -1,5 +1,13 @@
 # 📋 Notas de Versión - StockFlow
 
+## v1.4.1 - Integración de Cypress y Vitest.
+
+**Posted on 23-10-2025**
+
+**FEAT: TESTING**
+- [FEAT] Se integran bibliotecas externas y nativas para Testing: respectivamente Cypress y Vitest.
+- [FEAT] Se añaden archivos de configuración para testing, casos de prueba unitarios y E2E.
+
 ## v1.4.1 - Integración de historial de movimientos.
 
 **Posted on 23-10-2025**

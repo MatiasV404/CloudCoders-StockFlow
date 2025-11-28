@@ -28,3 +28,8 @@ dist-ssr
 .firebasearc
 *.cache
 dist/
+
+# Testing
+coverage/
+cypress/screenshots/
+cypress/videos/
