@@ -1,5 +1,26 @@
 # 📋 Notas de Versión - StockFlow
 
+## v1.5.0 - Recuperación de contraseña
+
+**Posted on 02-12-2025**
+
+**NEW: Funcionalidad de restablecer contraseña**
+- [FEAT] Se integra funcionalidad de recuperación de contraseña mediante Firebase Auth.
+- [FEAT] Nuevo enlace "¿Olvidaste tu contraseña?" en la vista de login.
+- [FEAT] Modal para ingresar email y solicitar enlace de recuperación.
+
+**NEW: Toast al agregar y editar un producto en el inventario**
+- [FEAT] Se integra uso del common toast al agregar un producto, editarlo o cuando ocurre un error.
+---
+
+## v1.4.1 - Integración de Cypress y Vitest.
+
+**Posted on 23-10-2025**
+
+**FEAT: TESTING**
+- [FEAT] Se integran bibliotecas externas y nativas para Testing: respectivamente Cypress y Vitest.
+- [FEAT] Se añaden archivos de configuración para testing, casos de prueba unitarios y E2E.
+
 ## v1.4.1 - Integración de historial de movimientos.
 
 **Posted on 23-10-2025**

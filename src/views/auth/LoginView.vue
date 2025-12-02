@@ -148,12 +148,19 @@
           </div>
         </div>
 
-        <!-- Checkbox "Guardar Sesión" solo para login -->
-        <div v-if="!isRegisterMode" class="flex items-center gap-2">
+        <!-- Checkbox y link de recuperar contraseña solo para login -->
+        <div v-if="!isRegisterMode" class="flex items-center justify-between">
           <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-600">
             <input v-model="rememberMe" type="checkbox" class="m-0 w-auto accent-blue-500" />
             Guardar Sesión
           </label>
+          <button 
+            type="button"
+            @click="showResetModal = true"
+            class="text-sm text-blue-500 hover:text-blue-700 hover:underline transition-colors"
+          >
+            ¿Olvidaste tu contraseña?
+          </button>
         </div>
 
         <div class="flex flex-col gap-3 mt-2">
@@ -241,6 +248,56 @@
         </p>
       </div>
     </div>
+
+    <!-- Modal Restablecer Contraseña -->
+    <div v-if="showResetModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+        <div class="text-center mb-6">
+          <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-blue-500" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12,17A2,2 0 0,0 14,15C14,13.89 13.1,13 12,13A2,2 0 0,0 10,15A2,2 0 0,0 12,17M18,8A2,2 0 0,1 20,10V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V10C4,8.89 4.9,8 6,8H7V6A5,5 0 0,1 12,1A5,5 0 0,1 17,6V8H18M12,3A3,3 0 0,0 9,6V8H15V6A3,3 0 0,0 12,3Z" />
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-800 m-0">Restablecer Contraseña</h3>
+          <p class="text-sm text-gray-600 mt-2">Ingresa tu email y te enviaremos un enlace para restablecer tu contraseña</p>
+        </div>
+
+        <form @submit.prevent="handleResetPassword" class="flex flex-col gap-4">
+          <div class="relative">
+            <input
+              v-model="resetEmail"
+              type="email"
+              placeholder="Ingresa tu email"
+              required
+              :disabled="resetLoading"
+              class="w-full px-4 py-3 pl-10 border-2 border-gray-200 rounded-lg text-base transition-colors focus:outline-none focus:border-blue-500 disabled:bg-gray-100"
+            />
+            <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M20,8L12,13L4,8V6L12,11L20,6M20,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6C22,4.89 21.1,4 20,4Z" />
+            </svg>
+          </div>
+
+          <div v-if="resetMessage" 
+               :class="resetSuccess ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'"
+               class="p-3 rounded-lg text-sm text-center border flex items-center gap-2 justify-center">
+            <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+              <path v-if="resetSuccess" d="M12 2C6.5 2 2 6.5 2 12S6.5 22 12 22 22 17.5 22 12 17.5 2 12 2M10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z" />
+              <path v-else d="M13,14H11V10H13M13,18H11V16H13M1,21H23L12,2L1,21Z" />
+            </svg>
+            {{ resetMessage }}
+          </div>
+
+          <div class="flex gap-3 mt-2">
+            <button type="button" @click="closeResetModal" class="flex-1 px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors">
+              Cancelar
+            </button>
+            <button type="submit" :disabled="resetLoading || !resetEmail" class="flex-1 px-4 py-3 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed">
+              {{ resetLoading ? 'Enviando...' : 'Enviar enlace' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -248,7 +305,7 @@
 import { ref } from 'vue'
 import { useAuth } from '../../composables/useAuth.js'
 
-const { loginWithEmail, registerWithEmail, loginWithGoogle, loading, error } = useAuth()
+const { loginWithEmail, registerWithEmail, loginWithGoogle, resetPassword, loading, error } = useAuth()
 
 const email = ref('')
 const password = ref('')
@@ -259,6 +316,13 @@ const isRegisterMode = ref(false)
 // Estados para mostrar/ocultar contraseñas
 const showPassword = ref(false)
 const showConfirmPassword = ref(false)
+
+// Estados para modal de reset password
+const showResetModal = ref(false)
+const resetEmail = ref('')
+const resetLoading = ref(false)
+const resetSuccess = ref(false)
+const resetMessage = ref('')
 
 const handleLogin = async () => {
   // Validación para registro
@@ -290,8 +354,30 @@ const toggleRegister = () => {
   isRegisterMode.value = !isRegisterMode.value
   error.value = null
   confirmPassword.value = ''
-  // Reset password visibility cuando cambias de modo
   showPassword.value = false
   showConfirmPassword.value = false
+}
+
+const handleResetPassword = async () => {
+  resetLoading.value = true
+  resetSuccess.value = false
+  resetMessage.value = ''
+  
+  const result = await resetPassword(resetEmail.value)
+  
+  resetLoading.value = false
+  resetMessage.value = result.message
+  resetSuccess.value = result.success
+  
+  if (result.success) {
+    setTimeout(() => closeResetModal(), 3000)
+  }
+}
+
+const closeResetModal = () => {
+  showResetModal.value = false
+  resetEmail.value = ''
+  resetSuccess.value = false
+  resetMessage.value = ''
 }
 </script>
