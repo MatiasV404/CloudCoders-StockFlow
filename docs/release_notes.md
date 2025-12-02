@@ -1,5 +1,16 @@
 # 📋 Notas de Versión - StockFlow
 
+## v1.5.0 - Recuperación de contraseña
+
+**Posted on 02-12-2025**
+
+**NEW: Funcionalidad de restablecer contraseña**
+- [FEAT] Se integra funcionalidad de recuperación de contraseña mediante Firebase Auth.
+- [FEAT] Nuevo enlace "¿Olvidaste tu contraseña?" en la vista de login.
+- [FEAT] Modal para ingresar email y solicitar enlace de recuperación.
+
+---
+
 ## v1.4.1 - Integración de Cypress y Vitest.
 
 **Posted on 23-10-2025**

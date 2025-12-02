@@ -4,7 +4,8 @@ import {
   createUserWithEmailAndPassword,
   signInWithPopup, 
   signOut,
-  onAuthStateChanged 
+  onAuthStateChanged,
+  sendPasswordResetEmail
 } from 'firebase/auth'
 import { 
   doc, 
@@ -260,6 +261,18 @@ export function useAuth() {
     }
   }
 
+  const resetPassword = async (emailAddress) => {
+    try {
+      error.value = null
+      await sendPasswordResetEmail(auth, emailAddress)
+      return { success: true, message: 'Se ha enviado un correo para restablecer tu contraseña' }
+    } catch (err) {
+      console.error('Error enviando email de recuperación:', err)
+      const message = getErrorMessage(err.code)
+      return { success: false, message }
+    }
+  }
+
   const getErrorMessage = (errorCode) => {
     const errorMessages = {
       'auth/user-not-found': 'Usuario no encontrado',
@@ -268,7 +281,8 @@ export function useAuth() {
       'auth/weak-password': 'La contraseña debe tener al menos 6 caracteres',
       'auth/invalid-email': 'Email inválido',
       'auth/invalid-credential': 'Credenciales inválidas',
-      'auth/too-many-requests': 'Demasiados intentos. Intenta más tarde'
+      'auth/too-many-requests': 'Demasiados intentos. Intenta más tarde',
+      'auth/missing-email': 'Debes ingresar un email'
     }
     return errorMessages[errorCode] || 'Error de autenticación'
   }
@@ -288,6 +302,7 @@ export function useAuth() {
     loginWithGoogle,
     createUserProfile,
     verifyProjectCode,
+    resetPassword,
     logout
   }
 }
