@@ -9,6 +9,8 @@
 - [FEAT] Nuevo enlace "¿Olvidaste tu contraseña?" en la vista de login.
 - [FEAT] Modal para ingresar email y solicitar enlace de recuperación.
 
+**NEW: Toast al agregar y editar un producto en el inventario**
+- [FEAT] Se integra uso del common toast al agregar un producto, editarlo o cuando ocurre un error.
 ---
 
 ## v1.4.1 - Integración de Cypress y Vitest.
