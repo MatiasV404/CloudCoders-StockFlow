@@ -1,0 +1,39 @@
+{
+  "adminUser": {
+    "uid": "admin-test-123",
+    "email": "admin@stockflow.com",
+    "password": "Admin123!",
+    "displayName": "Admin Test",
+    "role": "admin",
+    "projectCode": "TESTPROJ",
+    "permissions": {
+      "viewDashboard": true,
+      "manageProducts": true,
+      "viewReports": true,
+      "manageUsers": true
+    }
+  },
+  "operatorUser": {
+    "uid": "operator-test-456",
+    "email": "operator@stockflow.com",
+    "password": "Operator123!",
+    "displayName": "Operator Test",
+    "role": "operator",
+    "projectCode": "TESTPROJ",
+    "permissions": {
+      "viewDashboard": false,
+      "manageProducts": true,
+      "viewReports": false,
+      "manageUsers": false
+    }
+  },
+  "invalidUser": {
+    "email": "invalid@example.com",
+    "password": "wrongpassword"
+  },
+  "newUser": {
+    "email": "newuser@stockflow.com",
+    "password": "NewUser123!",
+    "confirmPassword": "NewUser123!"
+  }
+}

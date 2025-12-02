@@ -339,6 +339,15 @@
     </div>
     <ProductQRCode :show="showQRModal" :product-id="selectedProductForQR?.productId || ''"
       :product-name="selectedProductForQR?.name || ''" @close="closeQRModal" />
+    
+    <!-- Toast de éxito -->
+    <Toast 
+      :show="showToast" 
+      :title="toastTitle" 
+      :message="toastMessage" 
+      :type="toastType" 
+      @close="showToast = false" 
+    />
   </DashboardLayout>
 </template>
 
@@ -349,6 +358,7 @@ import DashboardLayout from '../../components/layout/DashboardLayout.vue'
 import ProductModal from '../../components/inventory/ProductModal.vue'
 import ConfirmModal from '../../components/common/ConfirmModal.vue'
 import ProductQRCode from '../../components/inventory/ProductQRCode.vue'
+import Toast from '../../components/common/Toast.vue'
 import { useProducts } from '../../composables/useProducts.js'
 import { useAuth } from '../../composables/useAuth.js'
 
@@ -381,6 +391,12 @@ const selectedProduct = ref(null)
 const productToDelete = ref(null)
 const showQRModal = ref(false)
 const selectedProductForQR = ref(null)
+
+// Estados para Toast
+const showToast = ref(false)
+const toastTitle = ref('')
+const toastMessage = ref('')
+const toastType = ref('success')
 
 // Suscripción en tiempo real
 let unsubscribe = null
@@ -478,14 +494,29 @@ const confirmDelete = (product) => {
 
 const handleSave = async (productData) => {
   try {
-    if (selectedProduct.value?.id) {
+    const isEdit = !!selectedProduct.value?.id
+    
+    if (isEdit) {
       await updateProduct(selectedProduct.value.id, productData)
     } else {
       await addProduct(productData)
     }
+    
     closeModal()
+    
+    // Mostrar toast de éxito
+    toastType.value = 'success'
+    toastTitle.value = isEdit ? 'Producto actualizado' : 'Producto agregado'
+    toastMessage.value = isEdit 
+      ? `"${productData.name}" se actualizó correctamente`
+      : `"${productData.name}" se agregó al inventario`
+    showToast.value = true
   } catch (error) {
     console.error('Error guardando producto:', error)
+    toastType.value = 'error'
+    toastTitle.value = 'Error'
+    toastMessage.value = 'No se pudo guardar el producto'
+    showToast.value = true
   }
 }
 

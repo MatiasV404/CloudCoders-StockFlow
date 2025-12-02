@@ -1,0 +1,85 @@
+{
+  "validProduct": {
+    "name": "Producto de Prueba",
+    "code": "TEST001",
+    "sku": "SKU-TEST-001",
+    "category": "Electrónica",
+    "status": "Activo",
+    "stock": 100,
+    "minStock": 10,
+    "price": 29990,
+    "cost": 15000,
+    "description": "Este es un producto de prueba para testing"
+  },
+  "lowStockProduct": {
+    "name": "Producto Stock Bajo",
+    "code": "LOW001",
+    "sku": "SKU-LOW-001",
+    "category": "Ropa",
+    "status": "Activo",
+    "stock": 3,
+    "minStock": 10,
+    "price": 19990,
+    "cost": 10000,
+    "description": "Producto con stock bajo para alertas"
+  },
+  "outOfStockProduct": {
+    "name": "Producto Agotado",
+    "code": "OUT001",
+    "sku": "SKU-OUT-001",
+    "category": "Alimentos",
+    "status": "Agotado",
+    "stock": 0,
+    "minStock": 5,
+    "price": 5990,
+    "cost": 3000,
+    "description": "Producto sin stock"
+  },
+  "discontinuedProduct": {
+    "name": "Producto Descontinuado",
+    "code": "DIS001",
+    "sku": "SKU-DIS-001",
+    "category": "Otros",
+    "status": "Descontinuado",
+    "stock": 50,
+    "minStock": 0,
+    "price": 9990,
+    "cost": 5000,
+    "description": "Producto que ya no se vende"
+  },
+  "productsList": [
+    {
+      "id": "prod-1",
+      "productId": "PRD-ABC123-XYZ789",
+      "name": "Laptop Gaming",
+      "code": "LAP001",
+      "category": "Electrónica",
+      "stock": 15,
+      "minStock": 5,
+      "price": 999990,
+      "status": "Activo"
+    },
+    {
+      "id": "prod-2",
+      "productId": "PRD-DEF456-UVW123",
+      "name": "Mouse Inalámbrico",
+      "code": "MOU001",
+      "category": "Electrónica",
+      "stock": 50,
+      "minStock": 10,
+      "price": 29990,
+      "status": "Activo"
+    },
+    {
+      "id": "prod-3",
+      "productId": "PRD-GHI789-RST456",
+      "name": "Teclado Mecánico",
+      "code": "TEC001",
+      "category": "Electrónica",
+      "stock": 2,
+      "minStock": 5,
+      "price": 79990,
+      "status": "Activo"
+    }
+  ]
+}
